@@ -1,0 +1,33 @@
+{
+  "author": "Andrew Nesbitt <andrewnez@gmail.com> (http://andrew.github.com)",
+  "name": "node-sass-middleware",
+  "description": "Connect middleware for node-sass",
+  "version": "0.1.0",
+  "homepage": "https://github.com/andrew/node-sass-middleware",
+  "keywords": [
+    "sass",
+    "css",
+    "libsass"
+  ],
+  "bugs": {
+    "url": "https://github.com/andrew/node-sass-middleware/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/andrew/node-sass-middleware/blob/master/LICENSE"
+    }
+  ],
+  "main": "./middleware.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/andrew/node-sass-middleware.git"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "dependencies": {
+    "mkdirp": "0.3.x",
+    "node-sass": "0.8.x"
+  }
+}
