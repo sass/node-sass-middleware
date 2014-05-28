@@ -27,7 +27,7 @@
     "node": ">=0.10.0"
   },
   "dependencies": {
-    "mkdirp": "0.3.x",
+    "mkdirp": "0.5.x",
     "node-sass": "0.8.x"
   }
 }
