@@ -1,6 +1,6 @@
 #node-sass-middleware
 
-[WIP] connect middleware for [node-sass](https://github.com/andrew/node-sass)
+Connect middleware for [node-sass](https://github.com/andrew/node-sass)
 
 ## Install
 
