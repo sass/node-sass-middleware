@@ -28,6 +28,6 @@
   },
   "dependencies": {
     "mkdirp": "0.5.x",
-    "node-sass": "0.8.x"
+    "node-sass": "0.9.x"
   }
 }
