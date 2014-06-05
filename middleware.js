@@ -15,9 +15,10 @@ var imports = {};
  *    `force`       Always re-compile
  *    `debug`       Output debugging information
  *    `src`         Source directory used to find .scss files
- *    `dest`        Destination directory used to output .cnode-ss files
+ *    `dest`        Destination directory used to output .css files
  *                  when undefined defaults to `src`.
  *    `outputStyle` Sass output style (nested,expanded, compact or compressed)
+ *    `response`    Always write output directly to response
  *
  * Examples:
  *
@@ -49,7 +50,7 @@ module.exports = function(options){
   }
 
   // Force compilation
-  var force = options.force;
+  var force = options.force || options.response;
 
   // Debug option
   var debug = options.debug;
@@ -92,7 +93,7 @@ module.exports = function(options){
 
       if (debug) {
         log('source', sassPath);
-        log('dest', cssPath);
+        log('dest', options.response ? '<response>' : cssPath);
       }
 
       // Ignore ENOENT to fall through as 404
@@ -112,8 +113,18 @@ module.exports = function(options){
           delete imports[sassPath];
           style.render(str, function(err, css){
             if (err) { return next(err); }
-            if (debug) { log('render', sassPath); }
+            if (debug) { log('render', options.response ? '<response>' : sassPath); }
             imports[sassPath] = paths;
+
+            // Send compiled CSS into response rather than writing to file
+            if (options.response) {
+              res.writeHead(200, {
+                'Content-Type': 'text/css',
+                'Cache-Control': 'max-age=0'
+              });
+              return res.end(css);
+            }
+
             mkdirp(dirname(cssPath), 0700, function(err){
               if (err) { return error(err); }
               fs.writeFile(cssPath, css, 'utf8', next);
