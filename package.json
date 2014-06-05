@@ -2,7 +2,7 @@
   "author": "Andrew Nesbitt <andrewnez@gmail.com> (http://andrew.github.com)",
   "name": "node-sass-middleware",
   "description": "Connect middleware for node-sass",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "homepage": "https://github.com/andrew/node-sass-middleware",
   "keywords": [
     "sass",
