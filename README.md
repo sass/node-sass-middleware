@@ -1,6 +1,6 @@
 #node-sass-middleware
 
-Connect middleware for [node-sass](https://github.com/andrew/node-sass)
+Connect middleware for [node-sass](https://github.com/sass/node-sass)
 
 ## Install
 
@@ -29,11 +29,11 @@ Heavily inspired by <https://github.com/LearnBoost/stylus>
 
 ## Example App
 
-There is an example connect app here: <https://github.com/andrew/node-sass-example>
+There is an example connect app here: <https://github.com/sass/node-sass-example>
 
 ## Contributors
 
-We <3 our contributors! A special thanks to all those who have clocked in some dev time on this project, we really appreciate your hard work. You can find [a full list of those people here.](https://github.com/andrew/node-sass/graphs/contributors)
+We <3 our contributors! A special thanks to all those who have clocked in some dev time on this project, we really appreciate your hard work. You can find [a full list of those people here.](https://github.com/sass/node-sass/graphs/contributors)
 
 ### Note on Patches/Pull Requests
 
@@ -45,4 +45,4 @@ We <3 our contributors! A special thanks to all those who have clocked in some d
 
 ## Copyright
 
-Copyright (c) 2013 Andrew Nesbitt. See [LICENSE](https://github.com/andrew/node-sass-middleware/blob/master/LICENSE) for details.
+Copyright (c) 2013 Andrew Nesbitt. See [LICENSE](https://github.com/sass/node-sass-middleware/blob/master/LICENSE) for details.
