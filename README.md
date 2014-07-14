@@ -33,7 +33,7 @@ There is an example connect app here: <https://github.com/sass/node-sass-example
 
 ## Contributors
 
-We <3 our contributors! A special thanks to all those who have clocked in some dev time on this project, we really appreciate your hard work. You can find [a full list of those people here.](https://github.com/sass/node-sass/graphs/contributors)
+We <3 our contributors! A special thanks to all those who have clocked in some dev time on this project, we really appreciate your hard work. You can find [a full list of those people here.](https://github.com/sass/node-sass-middleware/graphs/contributors)
 
 ### Note on Patches/Pull Requests
 
