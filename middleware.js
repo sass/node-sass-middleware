@@ -1,9 +1,9 @@
 var sass = require('node-sass'),
-    fs = require('fs'),
-    url = require('url'),
-    dirname = require('path').dirname,
-    mkdirp = require('mkdirp'),
-    join = require('path').join;
+  fs = require('fs'),
+  url = require('url'),
+  dirname = require('path').dirname,
+  mkdirp = require('mkdirp'),
+  join = require('path').join;
 
 var imports = {};
 
@@ -41,12 +41,14 @@ var imports = {};
  * @api public
  */
 
-module.exports = function(options){
+module.exports = function(options) {
   options = options || {};
 
   // Accept src/dest dir
   if ('string' == typeof options) {
-    options = { src: options };
+    options = {
+      src: options
+    };
   }
 
   // Force compilation
@@ -57,37 +59,39 @@ module.exports = function(options){
 
   // Source dir required
   var src = options.src;
-  if (!src) { throw new Error('sass.middleware() requires "src" directory'); }
+  if (!src) {
+    throw new Error('sass.middleware() requires "src" directory');
+  }
 
   // Default dest dir to source
-  var dest = options.dest
-    ? options.dest
-    : src;
+  var dest = options.dest ? options.dest : src;
 
   var root = options.root || null;
 
   // Default compile callback
-  options.compile = options.compile || function(){
+  options.compile = options.compile || function() {
     return sass;
   };
 
   // Middleware
-  return function sass(req, res, next){
-    if ('GET' != req.method && 'HEAD' != req.method) { return next(); }
+  return function sass(req, res, next) {
+    if ('GET' != req.method && 'HEAD' != req.method) {
+      return next();
+    }
     var path = url.parse(req.url).pathname;
     if (options.prefix && 0 === path.indexOf(options.prefix)) {
       path = path.substring(options.prefix.length);
     }
     if (/\.css$/.test(path)) {
       var cssPath = join(dest, path),
-          sassPath = join(src, path.replace('.css', '.scss')),
-          sassDir = dirname(sassPath);
+        sassPath = join(src, path.replace('.css', '.scss')),
+        sassDir = dirname(sassPath);
 
       if (root) {
         cssPath = join(root, dest, path.replace(dest, ''));
         sassPath = join(root, src, path
-            .replace(dest, '')
-            .replace('.css', '.scss'));
+          .replace(dest, '')
+          .replace('.css', '.scss'));
         sassDir = dirname(sassPath);
       }
 
@@ -98,22 +102,28 @@ module.exports = function(options){
 
       // Ignore ENOENT to fall through as 404
       var error = function(err) {
-        next('ENOENT' == err.code
-          ? null
-          : err);
+        next('ENOENT' == err.code ? null : err);
       };
 
       // Compile to cssPath
       var compile = function() {
-        if (debug) { log('read', cssPath); }
+        if (debug) {
+          log('read', cssPath);
+        }
         fs.readFile(sassPath, 'utf8', function(err, str) {
-          if (err) { return error(err); }
+          if (err) {
+            return error(err);
+          }
           var style = options.compile();
           var paths = [];
           delete imports[sassPath];
           style.render(str, function(err, css) {
-            if (err) { return next(err); }
-            if (debug) { log('render', options.response ? '<response>' : sassPath); }
+            if (err) {
+              return next(err);
+            }
+            if (debug) {
+              log('render', options.response ? '<response>' : sassPath);
+            }
             imports[sassPath] = paths;
 
             // Send compiled CSS into response rather than writing to file
@@ -126,11 +136,14 @@ module.exports = function(options){
             }
 
             mkdirp(dirname(cssPath), 0700, function(err) {
-              if (err) { return error(err); }
+              if (err) {
+                return error(err);
+              }
               fs.writeFile(cssPath, css, 'utf8', next);
             });
           }, {
-            include_paths: [ sassDir ].concat(options.include_paths || options.includePaths || []),
+            include_paths: [sassDir].concat(options.include_paths ||
+              options.includePaths || []),
             image_path: options.image_path || options.imagePath,
             output_style: options.output_style || options.outputStyle
           });
@@ -138,20 +151,28 @@ module.exports = function(options){
       };
 
       // Force
-      if (force) { return compile(); }
+      if (force) {
+        return compile();
+      }
 
       // Re-compile on server restart, disregarding
       // mtimes since we need to map imports
-      if (!imports[sassPath]) { return compile(); }
+      if (!imports[sassPath]) {
+        return compile();
+      }
 
       // Compare mtimes
-      fs.stat(sassPath, function(err, sassStats){
-        if (err) { return error(err); }
-        fs.stat(cssPath, function(err, cssStats){
+      fs.stat(sassPath, function(err, sassStats) {
+        if (err) {
+          return error(err);
+        }
+        fs.stat(cssPath, function(err, cssStats) {
           // CSS has not been compiled, compile it!
           if (err) {
             if ('ENOENT' == err.code) {
-              if (debug) { log('not found', cssPath); }
+              if (debug) {
+                log('not found', cssPath);
+              }
               compile();
             } else {
               next(err);
@@ -159,9 +180,11 @@ module.exports = function(options){
           } else {
             // Source has changed, compile it
             if (sassStats.mtime > cssStats.mtime) {
-              if (debug) { log('modified', cssPath); }
+              if (debug) {
+                log('modified', cssPath);
+              }
               compile();
-            // Already compiled, check imports
+              // Already compiled, check imports
             } else {
               checkImports(sassPath, function(changed) {
                 if (debug && changed && changed.length) {
@@ -191,14 +214,18 @@ module.exports = function(options){
 
 function checkImports(path, fn) {
   var nodes = imports[path];
-  if (!nodes) { return fn(); }
-  if (!nodes.length) { return fn(); }
+  if (!nodes) {
+    return fn();
+  }
+  if (!nodes.length) {
+    return fn();
+  }
 
   var pending = nodes.length,
-      changed = [];
+    changed = [];
 
-  nodes.forEach(function(imported){
-    fs.stat(imported.path, function(err, stat){
+  nodes.forEach(function(imported) {
+    fs.stat(imported.path, function(err, stat) {
       // error or newer mtime
       if (err || !imported.mtime || stat.mtime > imported.mtime) {
         changed.push(imported.path);
