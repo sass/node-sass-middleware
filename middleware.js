@@ -106,12 +106,12 @@ module.exports = function(options){
       // Compile to cssPath
       var compile = function() {
         if (debug) { log('read', cssPath); }
-        fs.readFile(sassPath, 'utf8', function(err, str){
+        fs.readFile(sassPath, 'utf8', function(err, str) {
           if (err) { return error(err); }
           var style = options.compile();
           var paths = [];
           delete imports[sassPath];
-          style.render(str, function(err, css){
+          style.render(str, function(err, css) {
             if (err) { return next(err); }
             if (debug) { log('render', options.response ? '<response>' : sassPath); }
             imports[sassPath] = paths;
@@ -125,7 +125,7 @@ module.exports = function(options){
               return res.end(css);
             }
 
-            mkdirp(dirname(cssPath), 0700, function(err){
+            mkdirp(dirname(cssPath), 0700, function(err) {
               if (err) { return error(err); }
               fs.writeFile(cssPath, css, 'utf8', next);
             });
