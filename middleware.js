@@ -163,7 +163,7 @@ module.exports = function(options){
               compile();
             // Already compiled, check imports
             } else {
-              checkImports(sassPath, function(changed){
+              checkImports(sassPath, function(changed) {
                 if (debug && changed && changed.length) {
                   changed.forEach(function(path) {
                     log('modified import %s', path);
