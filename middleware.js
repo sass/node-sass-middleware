@@ -116,19 +116,22 @@ module.exports = function(options){
             if (debug) { log('render', options.response ? '<response>' : sassPath); }
             imports[sassPath] = paths;
 
-            // Send compiled CSS into response rather than writing to file
-            if (options.response) {
-              res.writeHead(200, {
-                'Content-Type': 'text/css',
-                'Cache-Control': 'max-age=0'
-              });
-              return res.end(css);
+            // If response is falsey, also write to file
+            if (!options.response) {
+                mkdirp(dirname(cssPath), 0700, function(err){
+                    if (err) return error(err);
+                    fs.writeFile(cssPath, css, 'utf8', function(err) {
+                        if (err) return error(err);
+                    });
+                });
             }
 
-            mkdirp(dirname(cssPath), 0700, function(err){
-              if (err) { return error(err); }
-              fs.writeFile(cssPath, css, 'utf8', next);
+            res.writeHead(200, {
+                'Content-Type': 'text/css',
+                'Cache-Control': 'max-age=0'
             });
+            res.end(css);
+
           }, {
             include_paths: [ sassDir ].concat(options.include_paths || options.includePaths || []),
             image_path: options.image_path || options.imagePath,
