@@ -1,42 +1,98 @@
 'use strict';
+var fs = require('fs'),
+    path = require('path'),
+    should = require('should'),
+    sass = require('node-sass'),
+    request = require('supertest'),
+    connect = require('connect'),
+    middleware = require('../middleware'),
+    cssfile = path.join(__dirname, '/test.css'),
+    scssfile = path.join(__dirname, '/test.scss');
 
-var should = require('should'),
-  request = require('supertest'),
-  http = require('http'),
-  middleware = require('../middleware');
+describe('Creating middleware', function () {
 
-var server = http.createServer(function(req, res) {
-  /**
-   * not sure what goes here
-   * have to figure out how to do the necessary routing
-   */
+  it('throws an error when omitting src', function () {
+    middleware.should.throw(/requires "src"/);
+  });
+
+  it('returns function when invoked with src option', function () {
+    middleware({ src: __dirname }).should.be.type('function');
+  });
+
+  it('can be given a string as the src option', function () {
+    middleware(__dirname).should.be.type('function');
+  });
+
 });
 
-/**
- * Unit tests
- */
-describe('Middleware Unit Tests:', function() {
-  it('should throw an error when omitting src', function(done) {
-    try {
-      middleware({
-        // omitting the src attribute, plus some others for brevity
-      });
-    } catch(err) {
-      should.exist(err);
-      done();
-    }
+describe('Using middleware', function () {
+  var server = connect()
+    .use(middleware({
+      src: __dirname,
+      dest: __dirname
+    }));
+
+  beforeEach(function (done) {
+    fs.exists(cssfile, function (exists) {
+      if (exists) {
+        fs.unlink(cssfile, done);
+      } else {
+        done();
+      }
+    });
   });
 
-  it('should create a .css file when giving a valid options object and making a GET request', function(done) {
-    middleware({
-      src: 'test.scss',
-      dest: 'test.css'
+  describe('successful file request', function () {
+
+    it('serves a file with 200 Content-Type css', function (done) {
+      request(server)
+        .get('/test.css')
+        .set('Accept', 'text/css')
+        .expect('Content-Type', /css/)
+        .expect(200, done);
     });
 
-    request(server)
-      .get('/css/test.css')
-      .set('Accept', 'text/css')
-      .expect('Content-Type', /css/)
-      .expect(200, done);
+    it('serves the compiled contents of the relative scss file', function (done) {
+      var filesrc = fs.readFileSync(scssfile),
+          css = sass.renderSync(filesrc.toString());
+      request(server)
+        .get('/test.css')
+        .expect(css)
+        .expect(200, done);
+    });
+
+    it('writes the file contents out to the expected file', function (done) {
+      var filesrc = fs.readFileSync(scssfile),
+          css = sass.renderSync(filesrc.toString());
+      request(server)
+        .get('/test.css')
+        .expect(css)
+        .expect(200, function (err) {
+          if (err) {
+            done(err);
+          }
+          (function checkFile() {
+            if (fs.existsSync(cssfile)) {
+              fs.readFileSync(cssfile).toString().should.equal(css);
+              done();
+            } else {
+              setTimeout(checkFile, 25);
+            }
+          }());
+        });
+    });
+
   });
+
+  describe('unsucessful file request', function () {
+
+    it('moves to next middleware', function (done) {
+      request(server)
+        .get('/does-not-exist.css')
+        .expect('Cannot GET /does-not-exist.css\n')
+        .expect(404, done);
+    });
+
+  });
+
 });

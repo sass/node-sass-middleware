@@ -36,6 +36,8 @@
     "node-sass": "0.9.x"
   },
   "devDependencies": {
+    "node-sass": "0.9.x",
+    "connect": "^2.25.7",
     "mocha": "^1.21.4",
     "should": "^4.0.4",
     "supertest": "^0.13.0"
