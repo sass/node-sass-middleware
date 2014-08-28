@@ -3,6 +3,9 @@
   "name": "node-sass-middleware",
   "description": "Connect middleware for node-sass",
   "version": "0.3.0",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha"
+  },
   "homepage": "https://github.com/sass/node-sass-middleware",
   "keywords": [
     "sass",
@@ -31,5 +34,12 @@
   },
   "peerDependencies": {
     "node-sass": "0.9.x"
+  },
+  "devDependencies": {
+    "node-sass": "0.9.x",
+    "connect": "^2.25.7",
+    "mocha": "^1.21.4",
+    "should": "^4.0.4",
+    "supertest": "^0.13.0"
   }
 }
