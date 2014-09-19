@@ -4,7 +4,7 @@ Connect middleware for [node-sass](https://github.com/sass/node-sass)
 
 ## Install
 
-    npm install node-sass-middlware
+    npm install node-sass-middleware
 
 ## Usage
 
