@@ -70,15 +70,16 @@ describe('Using middleware', function () {
         .expect(200, function (err) {
           if (err) {
             done(err);
+          } else {
+            (function checkFile() {
+              if (fs.existsSync(cssfile)) {
+                fs.readFileSync(cssfile).toString().should.equal(css);
+                done();
+              } else {
+                setTimeout(checkFile, 25);
+              }
+            }());
           }
-          (function checkFile() {
-            if (fs.existsSync(cssfile)) {
-              fs.readFileSync(cssfile).toString().should.equal(css);
-              done();
-            } else {
-              setTimeout(checkFile, 25);
-            }
-          }());
         });
     });
 
