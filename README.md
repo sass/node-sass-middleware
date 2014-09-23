@@ -2,6 +2,12 @@
 
 Connect middleware for [node-sass](https://github.com/sass/node-sass)
 
+[![Build Status](https://travis-ci.org/sass/node-sass-middleware.svg?branch=master&style=flat)](https://travis-ci.org/sass/node-sass-middleware)
+[![npm version](https://badge.fury.io/js/node-sass-middleware.svg)](http://badge.fury.io/js/node-sass-middleware)
+[![Dependency Status](https://david-dm.org/sass/node-sass-middleware.svg?theme=shields.io)](https://david-dm.org/sass/node-sass-middleware)
+[![devDependency Status](https://david-dm.org/sass/node-sass-middleware/dev-status.svg?theme=shields.io)](https://david-dm.org/sass/node-sass-middleware#info=devDependencies)
+[![Gitter chat](http://img.shields.io/badge/gitter-sass/node--sass-brightgreen.svg)](https://gitter.im/sass/node-sass)
+
 ## Install
 
     npm install node-sass-middleware
