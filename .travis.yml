@@ -12,3 +12,4 @@ deploy:
     tags: true
     repo: sass/node-sass-middleware
     branch: master
+    all_branches: true
