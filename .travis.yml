@@ -7,7 +7,7 @@ deploy:
   email:
     secure: NQ7mta8ytdnZz65yRdAv4tvq079IVGaegD+QaWdIeNgAta+6nqLLBkVRVHRcoQgwsLLGJ40ggRVGIeAb4f+d8TycVBZZwrsLDI9xmJtWCh1nr0vqHNt+IA8cwyEQNF9zyAR/o16tMXtCEVNw8JjpwD+NVoHftoq/nM+xlnKlXeM=
   api_key:
-    secure: Z/Hzc1oaKtGmeWHHvq3c+A7BUpxZD6yEHUUWbcN+iXSVeWwVHGYMTYUm4LykNdGSkMPF7HoMPE9KV5gvqxiJuzVC4IcxyIoj8I1b82WQAuiyHwmg5/neEqLMy4Q/wd9JT+w754WPWXNyatMeXip2fe5YbUcfqgp5XzXYQMye4tc=
+    secure: FAiPYQhL4inAEOPb7xVdT9sIB4Kvy+z/XxoORnPV8JpfcTvWPcwzt2fO+K9CI1tQAw1Dw7WJfZlktDM/GcLQ89c/l8Jcm+ARVCQHGWLZc8EoxJ0rsqrPPqrIGUURVlEuiNjD5ozaRm+tOB5vanslC/1P3i7k6v5MMYTzsEQgox8=
   on:
     tags: true
     repo: sass/node-sass-middleware
