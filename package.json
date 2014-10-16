@@ -30,13 +30,10 @@
     "node": ">=0.10.0"
   },
   "dependencies": {
-    "mkdirp": "0.5.x"
-  },
-  "peerDependencies": {
-    "node-sass": "0.9.x"
+    "mkdirp": "0.5.x",
+    "node-sass": "^1.0.0"
   },
   "devDependencies": {
-    "node-sass": "0.9.x",
     "connect": "^2.25.7",
     "mocha": "^1.21.4",
     "should": "^4.0.4",
