@@ -26,6 +26,7 @@ var server = connect.createServer(
     , debug: true
     , outputStyle: 'compressed'
     , prefix:  '/prefix'
+    , indentedSyntax: false
   }),
   connect.static('/prefix', __dirname + '/public')
 );

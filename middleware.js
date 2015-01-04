@@ -135,7 +135,8 @@ module.exports = function(options){
           }, {
             include_paths: [ sassDir ].concat(options.include_paths || options.includePaths || []),
             image_path: options.image_path || options.imagePath,
-            output_style: options.output_style || options.outputStyle
+            output_style: options.output_style || options.outputStyle,
+            indentedSyntax: options.output_style || options.outputStyle || false
           });
         });
       };
