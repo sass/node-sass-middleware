@@ -29,8 +29,7 @@ describe('Using middleware', function () {
   var server = connect()
     .use(middleware({
       src: __dirname,
-      dest: __dirname,
-      debug: true
+      dest: __dirname
     }));
 
   beforeEach(function (done) {
