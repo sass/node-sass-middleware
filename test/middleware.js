@@ -29,7 +29,8 @@ describe('Using middleware', function () {
   var server = connect()
     .use(middleware({
       src: __dirname,
-      dest: __dirname
+      dest: __dirname,
+      debug: true
     }));
 
   beforeEach(function (done) {
@@ -54,26 +55,26 @@ describe('Using middleware', function () {
 
     it('serves the compiled contents of the relative scss file', function (done) {
       var filesrc = fs.readFileSync(scssfile),
-          css = sass.renderSync(filesrc.toString());
+          result = sass.renderSync({ data: filesrc.toString() });
       request(server)
         .get('/test.css')
-        .expect(css)
+        .expect(result.css)
         .expect(200, done);
     });
 
     it('writes the file contents out to the expected file', function (done) {
       var filesrc = fs.readFileSync(scssfile),
-          css = sass.renderSync(filesrc.toString());
+          result = sass.renderSync({ data: filesrc.toString() });
       request(server)
         .get('/test.css')
-        .expect(css)
+        .expect(result.css)
         .expect(200, function (err) {
           if (err) {
             done(err);
           } else {
             (function checkFile() {
               if (fs.existsSync(cssfile)) {
-                fs.readFileSync(cssfile).toString().should.equal(css);
+                fs.readFileSync(cssfile).toString().should.equal(result.css);
                 done();
               } else {
                 setTimeout(checkFile, 25);
