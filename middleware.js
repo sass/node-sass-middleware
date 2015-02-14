@@ -60,9 +60,7 @@ module.exports = function(options){
   if (!src) { throw new Error('sass.middleware() requires "src" directory'); }
 
   // Default dest dir to source
-  var dest = options.dest
-    ? options.dest
-    : src;
+  var dest = options.dest || src;
 
   var root = options.root || null;
 
@@ -111,31 +109,31 @@ module.exports = function(options){
           var style = options.compile();
           var paths = [];
           delete imports[sassPath];
-          style.render(str, function(err, css){
-            if (err) { return next(err); }
-            if (debug) { log('render', options.response ? '<response>' : sassPath); }
-            imports[sassPath] = paths;
+          style.render({
+            data: str,
+            success: function(result){
+              if (debug) { log('render', options.response ? '<response>' : sassPath); }
+              imports[sassPath] = paths;
 
-            // If response is falsey, also write to file
-            if (!options.response) {
-                mkdirp(dirname(cssPath), 0700, function(err){
-                    if (err) return error(err);
-                    fs.writeFile(cssPath, css, 'utf8', function(err) {
-                        if (err) return error(err);
-                    });
-                });
-            }
+              // If response is falsey, also write to file
+              if (!options.response) {
+                  mkdirp(dirname(cssPath), 0700, function(err){
+                      if (err) return error(err);
+                      fs.writeFile(cssPath, result.css, 'utf8', function(err) {
+                          if (err) return error(err);
+                      });
+                  });
+              }
 
-            res.writeHead(200, {
-                'Content-Type': 'text/css',
-                'Cache-Control': 'max-age=0'
-            });
-            res.end(css);
-
-          }, {
-            include_paths: [ sassDir ].concat(options.include_paths || options.includePaths || []),
-            image_path: options.image_path || options.imagePath,
-            output_style: options.output_style || options.outputStyle
+              res.writeHead(200, {
+                  'Content-Type': 'text/css',
+                  'Cache-Control': 'max-age=0'
+              });
+              res.end(result.css);
+            },
+            includePaths: [ sassDir ].concat(options.include_paths || options.includePaths || []),
+            imagePath: options.image_path || options.imagePath,
+            outputStyle: options.output_style || options.outputStyle
           });
         });
       };
