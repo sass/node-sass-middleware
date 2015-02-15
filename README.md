@@ -1,6 +1,6 @@
 #node-sass-middleware
 
-Connect middleware for [node-sass](https://github.com/sass/node-sass)
+Connect/Express middleware for [node-sass](https://github.com/sass/node-sass).
 
 [![Build Status](https://travis-ci.org/sass/node-sass-middleware.svg?branch=master&style=flat)](https://travis-ci.org/sass/node-sass-middleware)
 [![npm version](https://badge.fury.io/js/node-sass-middleware.svg)](http://badge.fury.io/js/node-sass-middleware)
@@ -14,7 +14,9 @@ Connect middleware for [node-sass](https://github.com/sass/node-sass)
 
 ## Usage
 
-Recompile `.scss` files automatically for connect and express based http servers
+Recompile `.scss` files automatically for connect and express based http servers.
+
+### Connect example
 
 ```javascript
 var connect = require('connect')
@@ -31,15 +33,36 @@ var server = connect.createServer(
 );
 ```
 
+There is an example connect app here: <https://github.com/andrew/node-sass-example>
+
 Heavily inspired by <https://github.com/LearnBoost/stylus>
 
-## Example App
+### Express example
 
-There is an example connect app here: <https://github.com/andrew/node-sass-example>
+```javascript
+var express = require('express');
+var sassMiddleware = require('node-sass-middleware');
+var path = require('path');
+var app = express();
+app.use(sassMiddleware({
+    src: __dirname,
+    dest: path.join(__dirname, 'public'),
+    debug: true,
+    outputStyle: 'compressed',
+    prefix:  '/prefix'
+}));
+app.use(express.static(path.join(__dirname, 'public')));
+```
+
+## Testing
+
+    npm install mocha -g
+    
+    mocha test
 
 ## Contributors
 
-We <3 our contributors! A special thanks to all those who have clocked in some dev time on this project, we really appreciate your hard work. You can find [a full list of those people here.](https://github.com/sass/node-sass-middleware/graphs/contributors)
+We <3 our contributors! A special thanks to all those who have clocked in some dev time on this project, we really appreciate your hard work. You can find [a full list of those people here](https://github.com/sass/node-sass-middleware/graphs/contributors).
 
 ### Note on Patches/Pull Requests
 
@@ -51,4 +74,4 @@ We <3 our contributors! A special thanks to all those who have clocked in some d
 
 ## Copyright
 
-Copyright (c) 2013 Andrew Nesbitt. See [LICENSE](https://github.com/sass/node-sass-middleware/blob/master/LICENSE) for details.
+Copyright (c) 2013+ Andrew Nesbitt. See [LICENSE](https://github.com/sass/node-sass-middleware/blob/master/LICENSE) for details.
