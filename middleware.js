@@ -107,13 +107,12 @@ module.exports = function(options){
         fs.readFile(sassPath, 'utf8', function(err, str){
           if (err) { return error(err); }
           var style = options.compile();
-          var paths = [];
           delete imports[sassPath];
           style.render({
             data: str,
             success: function(result){
               if (debug) { log('render', options.response ? '<response>' : sassPath); }
-              imports[sassPath] = paths;
+              imports[sassPath] = result.includedFiles;
 
               // If response is falsey, also write to file
               if (!options.response) {
