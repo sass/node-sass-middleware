@@ -112,7 +112,7 @@ module.exports = function(options){
             data: str,
             success: function(result){
               if (debug) { log('render', options.response ? '<response>' : sassPath); }
-              imports[sassPath] = result.includedFiles;
+              imports[sassPath] = result.stats.includedFiles;
 
               // If response is falsey, also write to file
               if (!options.response) {
@@ -129,6 +129,10 @@ module.exports = function(options){
                   'Cache-Control': 'max-age=0'
               });
               res.end(result.css);
+            },
+            error: function(err) {
+              if (options.error) options.error(err);
+              return error(err);
             },
             includePaths: [ sassDir ].concat(options.include_paths || options.includePaths || []),
             imagePath: options.image_path || options.imagePath,
@@ -163,7 +167,7 @@ module.exports = function(options){
               compile();
             // Already compiled, check imports
             } else {
-              checkImports(sassPath, function(changed){
+              checkImports(sassPath, cssStats.mtime, function(changed){
                 if (debug && changed && changed.length) {
                   changed.forEach(function(path) {
                     log('modified import %s', path);
@@ -189,7 +193,8 @@ module.exports = function(options){
  * @api private
  */
 
-function checkImports(path, fn) {
+function checkImports(path, time, fn) {
+
   var nodes = imports[path];
   if (!nodes) { return fn(); }
   if (!nodes.length) { return fn(); }
@@ -198,10 +203,10 @@ function checkImports(path, fn) {
       changed = [];
 
   nodes.forEach(function(imported){
-    fs.stat(imported.path, function(err, stat){
+    fs.stat(imported, function(err, stat){
       // error or newer mtime
-      if (err || !imported.mtime || stat.mtime > imported.mtime) {
-        changed.push(imported.path);
+      if (err || stat.mtime > time) {
+        changed.push(imported);
       }
       --pending || fn(changed);
     });
