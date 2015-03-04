@@ -1,0 +1,12 @@
+body {
+  margin: 0; }
+  body ul {
+    margin: 0;
+    /* toss in a comment here */ }
+    body ul li {
+      list-style: none; }
+      body ul li a {
+        color: blue;
+        text-decoration: none; }
+        body ul li a:hover {
+          color: green; }

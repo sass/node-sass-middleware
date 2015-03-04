@@ -7,7 +7,9 @@ var fs = require('fs'),
     connect = require('connect'),
     middleware = require('../middleware'),
     cssfile = path.join(__dirname, '/test.css'),
-    scssfile = path.join(__dirname, '/test.scss');
+    scssfile = path.join(__dirname, '/test.scss'),
+    cssIndexFile = path.join(__dirname, '/index.css'),
+    scssDependentFile = path.join(__dirname, '/test.scss');
 
 describe('Creating middleware', function () {
 
@@ -94,6 +96,31 @@ describe('Using middleware', function () {
         .expect(404, done);
     });
 
+  });
+
+  describe('compiling files with dependences (source file contains includes)', function() {
+
+    it('any change in a dependent file, force recompiling', function(done) {
+
+      request(server)
+        .get('/index.css')
+        .expect(200, function() {
+          fs.stat(cssIndexFile, function(err, initialDate) {
+            // modify dependent file
+            fs.appendFile(scssDependentFile, '\n', function(err, data) {
+              if (err) throw err;
+              request(server)
+                .get('/index.css')
+                .expect(200, function() {
+                    fs.stat(cssIndexFile, function(err, endDate) {
+                      if (endDate.mtime > initialDate.mtime) done();
+                    });
+                });
+            });
+          });
+
+        });
+    });
   });
 
 });
