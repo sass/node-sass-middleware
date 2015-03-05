@@ -101,6 +101,43 @@ module.exports = function(options){
           : err);
       };
 
+      // When render is done, respond to the request accordingly
+      var done = function(err, result) {
+
+        var data;
+
+        if (err) {
+          var fileLineColumn = sassPath + ':' + err.line + ':' + err.column;
+          data = err.message + ' in ' + fileLineColumn;
+          if (debug) logError(data);
+          if (options.error) options.error(err);
+        }
+
+        else {
+
+          data = result.css;
+
+          if (debug) { log('render', options.response ? '<response>' : sassPath); }
+          imports[sassPath] = result.stats.includedFiles;
+
+          // If response is falsey, also write to file
+          if (!options.response) {
+              mkdirp(dirname(cssPath), 0700, function(err){
+                  if (err) return error(err);
+                  fs.writeFile(cssPath, data, 'utf8', function(err) {
+                      if (err) return error(err);
+                  });
+              });
+          }
+        }
+
+        res.writeHead(200, {
+            'Content-Type': 'text/css',
+            'Cache-Control': 'max-age=0'
+        });
+        res.end(data);
+      }
+
       // Compile to cssPath
       var compile = function() {
         if (debug) { log('read', cssPath); }
@@ -111,28 +148,10 @@ module.exports = function(options){
           style.render({
             data: str,
             success: function(result){
-              if (debug) { log('render', options.response ? '<response>' : sassPath); }
-              imports[sassPath] = result.stats.includedFiles;
-
-              // If response is falsey, also write to file
-              if (!options.response) {
-                  mkdirp(dirname(cssPath), 0700, function(err){
-                      if (err) return error(err);
-                      fs.writeFile(cssPath, result.css, 'utf8', function(err) {
-                          if (err) return error(err);
-                      });
-                  });
-              }
-
-              res.writeHead(200, {
-                  'Content-Type': 'text/css',
-                  'Cache-Control': 'max-age=0'
-              });
-              res.end(result.css);
+              done(null, result);
             },
             error: function(err) {
-              if (options.error) options.error(err);
-              return error(err);
+              done(err);
             },
             includePaths: [ sassDir ].concat(options.include_paths || options.includePaths || []),
             imagePath: options.image_path || options.imagePath,
@@ -221,4 +240,14 @@ function checkImports(path, time, fn) {
 
 function log(key, val) {
   console.error('  \033[90m%s :\033[0m \033[36m%s\033[0m', key, val);
+}
+
+/**
+ * Log an error message.
+ *
+ * @api private
+ */
+
+function logError(message) {
+  log('error', '\007\033[31m' + message + '\033[91m')
 }
