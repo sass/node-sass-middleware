@@ -103,7 +103,6 @@ module.exports = function(options){
 
       // When render is done, respond to the request accordingly
       var done = function(err, result) {
-
         var data;
 
         if (err) {
@@ -111,10 +110,7 @@ module.exports = function(options){
           data = err.message + ' in ' + fileLineColumn;
           if (debug) logError(data);
           if (options.error) options.error(err);
-        }
-
-        else {
-
+        } else {
           data = result.css;
 
           if (debug) { log('render', options.response ? '<response>' : sassPath); }
