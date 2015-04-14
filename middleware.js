@@ -78,14 +78,14 @@ module.exports = function(options){
     }
     if (/\.css$/.test(path)) {
       var cssPath = join(dest, path),
-          sassPath = join(src, path.replace('.css', '.scss')),
+          sassPath = join(src, path.replace(/\.css$/, '.scss')),
           sassDir = dirname(sassPath);
 
       if (root) {
-        cssPath = join(root, dest, path.replace(dest, ''));
+        cssPath = join(root, dest, path.replace(new RegExp('^' + dest), ''));
         sassPath = join(root, src, path
-            .replace(dest, '')
-            .replace('.css', '.scss'));
+            .replace(new RegExp('^' + dest), '')
+            .replace(/\.css$/, '.scss'));
         sassDir = dirname(sassPath);
       }
 
