@@ -156,7 +156,7 @@ module.exports = function(options){
           delete imports[sassPath];
           style.render({
             data: str,
-            includePaths: [ sassDir ].concat(options.include_paths || options.includePaths || []),
+            includePaths: [sassDir].concat(options.include_paths || options.includePaths || []),
             outputStyle: options.output_style || options.outputStyle
           }, done);
         });

@@ -66,7 +66,7 @@ describe('Using middleware', function () {
           result = sass.renderSync({ data: filesrc.toString() });
       request(server)
         .get('/test.css')
-        .expect(result.css)
+        .expect(result.css.toString())
         .expect(200, done);
     });
 
@@ -75,14 +75,14 @@ describe('Using middleware', function () {
           result = sass.renderSync({ data: filesrc.toString() });
       request(server)
         .get('/test.css')
-        .expect(result.css)
+        .expect(result.css.toString())
         .expect(200, function (err) {
           if (err) {
             done(err);
           } else {
             (function checkFile() {
               if (fs.existsSync(cssfile)) {
-                fs.readFileSync(cssfile).toString().should.equal(result.css);
+                fs.readFileSync(cssfile).toString().should.equal(result.css.toString());
                 done();
               } else {
                 setTimeout(checkFile, 25);
@@ -126,7 +126,7 @@ describe('Using middleware', function () {
                     .expect(200, function() {
                       (function checkRecompiledFile() {
                         var cont = fs.readFileSync(cssIndexFile).toString();
-                        if (cont === result.css) {
+                        if (cont === result.css.toString()) {
                           done();
                         } else {
                           setTimeout(checkRecompiledFile, 10);
