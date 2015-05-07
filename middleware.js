@@ -120,6 +120,8 @@ module.exports = function(options){
           if (debug) logError(data);
 
           if (options.error) options.error(err);
+
+          res.status(500).end();
         } else {
           data = result.css;
 
