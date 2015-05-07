@@ -67,7 +67,7 @@ module.exports = function(options){
   var root = options.root || null;
 
   // Default compile callback
-  options.compile = options.compile || function(){
+  options.compile = options.compile || function() {
     return sass;
   };
 
@@ -78,8 +78,11 @@ module.exports = function(options){
     if (options.prefix && 0 === path.indexOf(options.prefix)) {
       path = path.substring(options.prefix.length);
     }
-    if (/\.css$/.test(path)) {
-      var cssPath = join(dest, path),
+
+    if (!/\.css$/.test(path)) {
+      next();
+    } else {
+      var cssPath  = join(dest, path),
           sassPath = join(src, path.replace(/\.css$/, '.scss')),
           sassDir = dirname(sassPath);
 
@@ -108,9 +111,14 @@ module.exports = function(options){
         var data;
 
         if (err) {
-          var fileLineColumn = sassPath + ':' + err.line + ':' + err.column;
-          data = err.message + ' in ' + fileLineColumn;
+          var file = sassPath;
+          if (err.file && err.file != 'stdin')
+            file = err.file;
+
+          var fileLineColumn = file + ':' + err.line + ':' + err.column;
+          data = err.message + '\n\nin ' + fileLineColumn;
           if (debug) logError(data);
+
           if (options.error) options.error(err);
         } else {
           data = result.css;
@@ -145,16 +153,9 @@ module.exports = function(options){
           delete imports[sassPath];
           style.render({
             data: str,
-            success: function(result){
-              done(null, result);
-            },
-            error: function(err) {
-              done(err);
-            },
             includePaths: [ sassDir ].concat(options.include_paths || options.includePaths || []),
-            imagePath: options.image_path || options.imagePath,
             outputStyle: options.output_style || options.outputStyle
-          });
+          }, done);
         });
       };
 
@@ -196,8 +197,6 @@ module.exports = function(options){
           }
         });
       });
-    } else {
-      next();
     }
   };
 };
