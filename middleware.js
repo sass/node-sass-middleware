@@ -1,3 +1,5 @@
+"use strict";
+
 var sass = require('node-sass'),
     fs = require('fs'),
     url = require('url'),
@@ -118,7 +120,7 @@ module.exports = function(options){
 
           // If response is falsey, also write to file
           if (!options.response) {
-              mkdirp(dirname(cssPath), 0700, function(err){
+              mkdirp(dirname(cssPath), '0700', function(err){
                   if (err) return error(err);
                   fs.writeFile(cssPath, data, 'utf8', function(err) {
                       if (err) return error(err);
@@ -235,7 +237,7 @@ function checkImports(path, time, fn) {
  */
 
 function log(key, val) {
-  console.error('  \033[90m%s :\033[0m \033[36m%s\033[0m', key, val);
+  console.error('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
 }
 
 /**
@@ -245,5 +247,5 @@ function log(key, val) {
  */
 
 function logError(message) {
-  log('error', '\007\033[31m' + message + '\033[91m')
+  log('error', '  \x07\x1B[31m' + message + '\x1B[91m')
 }
