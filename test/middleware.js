@@ -9,7 +9,8 @@ var fs = require('fs'),
     cssfile = path.join(__dirname, '/test.css'),
     scssfile = path.join(__dirname, '/test.scss'),
     cssIndexFile = path.join(__dirname, '/index.css'),
-    scssDependentFile = path.join(__dirname, '/test.scss');
+    scssDependentFile = path.join(__dirname, '/test.scss'),
+    scssIndexFile = path.join(__dirname, '/index.scss');
 
 describe('Creating middleware', function () {
 
@@ -37,11 +38,17 @@ describe('Using middleware', function () {
   beforeEach(function (done) {
     fs.exists(cssfile, function (exists) {
       if (exists) {
-        fs.unlink(cssfile, done);
-      } else {
-        done();
+        fs.unlink(cssfile);
       }
     });
+
+    fs.exists(cssIndexFile, function (exists) {
+      if (exists) {
+        fs.unlink(cssIndexFile);
+      }
+    });
+
+    done();
   });
 
   describe('successful file request', function () {
@@ -105,22 +112,36 @@ describe('Using middleware', function () {
       request(server)
         .get('/index.css')
         .expect(200, function() {
-          fs.stat(cssIndexFile, function(err, initialDate) {
-            // modify dependent file
-            fs.appendFile(scssDependentFile, '\n', function(err, data) {
-              if (err) throw err;
-              request(server)
-                .get('/index.css')
-                .expect(200, function() {
-                    fs.stat(cssIndexFile, function(err, endDate) {
-                      if (endDate.mtime > initialDate.mtime) done();
+          (function checkInitialFile() {
+            fs.stat(cssIndexFile, function(err, initialDate) {
+              if (initialDate != undefined) {
+                fs.appendFile(scssDependentFile, '\nbody { background: red; }', function(err, data) {
+                  if (err) throw err;
+
+                  var filesrc = fs.readFileSync(scssIndexFile),
+                      result = sass.renderSync({ data: filesrc.toString() });
+
+                  request(server)
+                    .get('/index.css')
+                    .expect(200, function() {
+                      (function checkRecompiledFile() {
+                        var cont = fs.readFileSync(cssIndexFile).toString();
+                        if (cont === result.css) {
+                          done();
+                        } else {
+                          setTimeout(checkRecompiledFile, 10);
+                        }
+                      }());
                     });
                 });
+              } else {
+                setTimeout(checkInitialFile, 10);
+              }
             });
-          });
-
+          }());
         });
     });
+
   });
 
 });
