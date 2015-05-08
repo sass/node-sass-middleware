@@ -121,7 +121,8 @@ module.exports = function(options){
 
           if (options.error) options.error(err);
 
-          res.status(500).end();
+          res.statusCode = 500;
+          res.end();
         } else {
           data = result.css;
 
