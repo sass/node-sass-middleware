@@ -224,7 +224,7 @@ function checkImports(path, time, fn) {
   nodes.forEach(function(imported){
     fs.stat(imported, function(err, stat){
       // error or newer mtime
-      if (err || stat.mtime > time) {
+      if (err || stat.mtime >= time) {
         changed.push(imported);
       }
       --pending || fn(changed);
