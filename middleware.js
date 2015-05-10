@@ -60,6 +60,10 @@ module.exports = function(options){
   // Source dir required
   var src = options.src;
   if (!src) { throw new Error('sass.middleware() requires "src" directory'); }
+  // This function will be called if something goes wrong
+  var error = typeof options.error === 'function' ? options.error : function (err) {
+    throw err;
+  }
 
   // Default dest dir to source
   var dest = options.dest || src;
@@ -96,22 +100,25 @@ module.exports = function(options){
         log('dest', options.response ? '<response>' : cssPath);
       }
 
-      // Ignore ENOENT to fall through as 404
-      var error = function(err) {
-        next('ENOENT' == err.code
-          ? null
-          : err);
-      };
-
       // When render is done, respond to the request accordingly
       var done = function(err, result) {
         var data;
 
         if (err) {
-          var fileLineColumn = sassPath + ':' + err.line + ':' + err.column;
-          data = err.message + ' in ' + fileLineColumn;
+          var file = sassPath;
+          if (err.file && err.file != 'stdin') {
+            file = err.file;
+          }
+
+          var fileLineColumn = file + ':' + err.line + ':' + err.column;
+          data = err.message.replace(/^ +/, '') + '\n\nin ' + fileLineColumn;
+
+          res.statusCode = 500;
+          res.end();
+
           if (debug) logError(data);
-          if (options.error) options.error(err);
+
+          error(err);
         } else {
           data = result.css;
 
