@@ -47,7 +47,7 @@ var imports = {};
  * @api public
  */
 
-module.exports = function(options){
+module.exports = function(options) {
   options = options || {};
 
   // Accept single src/dest dir
@@ -75,18 +75,24 @@ module.exports = function(options){
   var debug = options.debug;
 
   // Default compile callback
-  options.compile = options.compile || function(){
+  options.compile = options.compile || function() {
     return sass;
   };
 
   // Middleware
-  return function sass(req, res, next){
-    if ('GET' != req.method && 'HEAD' != req.method) { return next(); }
+  return function sass(req, res, next) {
+    if (req.method != 'GET' && req.method != 'HEAD') {
+      return next();
+    }
+
     var path = url.parse(req.url).pathname;
     if (options.prefix && 0 === path.indexOf(options.prefix)) {
       path = path.substring(options.prefix.length);
     }
-    if (/\.css$/.test(path)) {
+
+    if (!/\.css$/.test(path)) {
+      next();
+    } else {
       var cssPath = join(dest, path),
           sassPath = join(src, path.replace(/\.css$/, '.scss')),
           sassDir = dirname(sassPath);
@@ -131,18 +137,21 @@ module.exports = function(options){
 
           // If response is falsey, also write to file
           if (!options.response) {
-              mkdirp(dirname(cssPath), '0700', function(err){
-                  if (err) return error(err);
-                  fs.writeFile(cssPath, data, 'utf8', function(err) {
-                      if (err) return error(err);
-                  });
+            mkdirp(dirname(cssPath), '0700', function(err) {
+              if (err) {
+                return error(err);
+              }
+
+              fs.writeFile(cssPath, data, 'utf8', function(err) {
+                if (err) return error(err);
               });
+            });
           }
         }
 
         res.writeHead(200, {
-            'Content-Type': 'text/css',
-            'Cache-Control': 'max-age=0'
+          'Content-Type': 'text/css',
+          'Cache-Control': 'max-age=0'
         });
         res.end(data);
       }
@@ -150,7 +159,8 @@ module.exports = function(options){
       // Compile to cssPath
       var compile = function() {
         if (debug) { log('read', cssPath); }
-        fs.readFile(sassPath, 'utf8', function(err, str){
+
+        fs.readFile(sassPath, 'utf8', function(err, str) {
           if (err) { return error(err); }
           var style = options.compile();
           delete imports[sassPath];
@@ -163,7 +173,9 @@ module.exports = function(options){
       };
 
       // Force
-      if (force) { return compile(); }
+      if (force){
+        return compile();
+      }
 
       // Re-compile on server restart, disregarding
       // mtimes since we need to map imports
@@ -188,7 +200,7 @@ module.exports = function(options){
               compile();
             // Already compiled, check imports
             } else {
-              checkImports(sassPath, cssStats.mtime, function(changed){
+              checkImports(sassPath, cssStats.mtime, function(changed) {
                 if (debug && changed && changed.length) {
                   changed.forEach(function(path) {
                     log('modified import %s', path);
@@ -200,8 +212,6 @@ module.exports = function(options){
           }
         });
       });
-    } else {
-      next();
     }
   };
 };
@@ -215,10 +225,10 @@ module.exports = function(options){
  */
 
 function checkImports(path, time, fn) {
-
   var nodes = imports[path];
-  if (!nodes) { return fn(); }
-  if (!nodes.length) { return fn(); }
+  if (!nodes || !nodes.length) {
+    return fn();
+  }
 
   var pending = nodes.length,
       changed = [];
