@@ -145,16 +145,9 @@ module.exports = function(options){
           delete imports[sassPath];
           style.render({
             data: str,
-            includePaths: [sassDir].concat(options.include_paths || options.includePaths || []),
-            imagePath: options.image_path || options.imagePath,
-            outputStyle: options.output_style || options.outputStyle
-          }, function (err, result) {
-            if (err) {
-              done(err);
-            } else {
-              done(null, result);
-            }
-          });
+            includePaths: [sassDir].concat(options.includePaths || []),
+            outputStyle: options.outputStyle
+          }, done);
         });
       };
 
