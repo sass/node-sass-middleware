@@ -6,8 +6,8 @@ var fs = require('fs'),
     request = require('supertest'),
     connect = require('connect'),
     middleware = require('../middleware'),
-    cssfile = path.join(__dirname, '/test.css'),
-    scssfile = path.join(__dirname, '/test.scss'),
+    cssFile = path.join(__dirname, '/test.css'),
+    scssFile = path.join(__dirname, '/test.scss'),
     cssIndexFile = path.join(__dirname, '/index.css'),
     scssDependentFile = path.join(__dirname, '/test.scss'),
     scssIndexFile = path.join(__dirname, '/index.scss');
@@ -33,12 +33,16 @@ describe('Using middleware', function () {
     .use(middleware({
       src: __dirname,
       dest: __dirname
-    }));
+    }))
+    .use(function(err, req, res, next) {
+      res.statusCode = 500;
+      res.end(err.message);
+    });
 
   beforeEach(function (done) {
-    fs.exists(cssfile, function (exists) {
+    fs.exists(cssFile, function (exists) {
       if (exists) {
-        fs.unlink(cssfile);
+        fs.unlink(cssFile);
       }
     });
 
@@ -62,7 +66,7 @@ describe('Using middleware', function () {
     });
 
     it('serves the compiled contents of the relative scss file', function (done) {
-      var filesrc = fs.readFileSync(scssfile),
+      var filesrc = fs.readFileSync(scssFile),
           result = sass.renderSync({ data: filesrc.toString() });
       request(server)
         .get('/test.css')
@@ -71,7 +75,7 @@ describe('Using middleware', function () {
     });
 
     it('writes the file contents out to the expected file', function (done) {
-      var filesrc = fs.readFileSync(scssfile),
+      var filesrc = fs.readFileSync(scssFile),
           result = sass.renderSync({ data: filesrc.toString() });
       request(server)
         .get('/test.css')
@@ -81,8 +85,8 @@ describe('Using middleware', function () {
             done(err);
           } else {
             (function checkFile() {
-              if (fs.existsSync(cssfile)) {
-                fs.readFileSync(cssfile).toString().should.equal(result.css.toString());
+              if (fs.existsSync(cssFile)) {
+                fs.readFileSync(cssFile).toString().should.equal(result.css.toString());
                 done();
               } else {
                 setTimeout(checkFile, 25);
@@ -105,7 +109,30 @@ describe('Using middleware', function () {
 
   });
 
-  describe('compiling files with dependences (source file contains includes)', function() {
+  describe('compiling files with dependencies (source file contains includes)', function() {
+
+    it('serves the expected result', function (done) {
+      var filesrc = fs.readFileSync(scssIndexFile),
+          result = sass.renderSync({ data: filesrc.toString() });
+      request(server)
+        .get('/index.css')
+        .expect('Content-Type', /css/)
+        .expect(result.css.toString())
+        .expect(200, function (err) {
+          if (err) {
+            done(err);
+          } else {
+            (function checkFile() {
+              if (fs.existsSync(cssIndexFile)) {
+                fs.readFileSync(cssIndexFile).toString().should.equal(result.css.toString());
+                done();
+              } else {
+                setTimeout(checkFile, 25);
+              }
+            }());
+          }
+        });
+    });
 
     it('any change in a dependent file, force recompiling', function(done) {
 
@@ -140,6 +167,42 @@ describe('Using middleware', function () {
             });
           }());
         });
+
+      // clean
+      after(function(){
+        var reset = fs.readFileSync(scssDependentFile).toString().replace('\nbody { background: red; }', '');
+        fs.writeFileSync(scssDependentFile, reset, { flag: 'w' });
+      });
+
+    });
+
+  });
+
+  describe('compiling files with errors moves to next middleware with err', function() {
+
+    // alter
+    before(function(){
+      fs.appendFileSync(scssDependentFile, '\nbody { background;: red; }');
+    })
+
+    it('if error is in the main file', function(done) {
+      request(server)
+        .get('/test.css')
+        .expect('property "background" must be followed by a \':\'')
+        .expect(500, done);
+    });
+
+    it('if error is in imported file', function(done) {
+      request(server)
+        .get('/index.css')
+        .expect('property "background" must be followed by a \':\'')
+        .expect(500, done);
+    });
+
+    // clean
+    after(function(){
+      var reset = fs.readFileSync(scssDependentFile).toString().replace('\nbody { background;: red; }', '');
+      fs.writeFileSync(scssDependentFile, reset, { flag: 'w' });
     });
 
   });
