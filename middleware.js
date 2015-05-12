@@ -23,8 +23,7 @@ var imports = {};
  *    `debug`       Output debugging information
  *    `response`    True (default) to write output directly to response 
  *                   instead of to a file
- *    `error`       Function to be called when something goes wrong, default
- *                   will be throw the Error
+ *    `error`       A function to be called when something goes wrong
  *
  * Examples:
  *
@@ -56,9 +55,7 @@ module.exports = function(options) {
   }
 
   // This function will be called if something goes wrong
-  var error = typeof options.error === 'function' ? options.error : function (err) {
-    throw err;
-  }
+  var error = options.error || function() { };
 
   // Source directory (required)
   var src = options.src || function() {
@@ -122,13 +119,11 @@ module.exports = function(options) {
 
           var fileLineColumn = file + ':' + err.line + ':' + err.column;
           data = err.message.replace(/^ +/, '') + '\n\nin ' + fileLineColumn;
-
-          res.statusCode = 500;
-          res.end();
-
           if (debug) logError(data);
 
           error(err);
+
+          return next(err);
         } else {
           data = result.css;
 
@@ -143,7 +138,9 @@ module.exports = function(options) {
               }
 
               fs.writeFile(cssPath, data, 'utf8', function(err) {
-                if (err) return error(err);
+                if (err) {
+                  return error(err);
+                }
               });
             });
           }
@@ -161,7 +158,10 @@ module.exports = function(options) {
         if (debug) { log('read', cssPath); }
 
         fs.readFile(sassPath, 'utf8', function(err, str) {
-          if (err) { return error(err); }
+          if (err) {
+            error(err);
+            return next();
+          }
           var style = options.compile();
           delete imports[sassPath];
           style.render({
@@ -179,11 +179,16 @@ module.exports = function(options) {
 
       // Re-compile on server restart, disregarding
       // mtimes since we need to map imports
-      if (!imports[sassPath]) { return compile(); }
+      if (!imports[sassPath]) {
+        return compile();
+      }
 
       // Compare mtimes
       fs.stat(sassPath, function(err, sassStats){
-        if (err) { return error(err); }
+        if (err) { 
+          error(err);
+          return next();
+        }
         fs.stat(cssPath, function(err, cssStats){
           // CSS has not been compiled, compile it!
           if (err) {
