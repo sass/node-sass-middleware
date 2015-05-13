@@ -1,0 +1,18 @@
+# Set default behaviour, in case users don't have core.autocrlf set.
+* text=auto
+
+# Explicitly declare text files we want to always be normalized and converted
+# to native line endings on checkout.
+
+# Declare files that will always have LF line endings on checkout.
+*.css text eol=lf
+.editorconfig text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+LICENSE text eol=lf
+*.md text eol=lf
+*.sass text eol=lf
+*.scss text eol=lf
+*.yml text eol=lf
