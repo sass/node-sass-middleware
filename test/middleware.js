@@ -6,11 +6,12 @@ var fs = require('fs'),
     request = require('supertest'),
     connect = require('connect'),
     middleware = require('../middleware'),
-    cssFile = path.join(__dirname, '/test.css'),
-    scssFile = path.join(__dirname, '/test.scss'),
-    cssIndexFile = path.join(__dirname, '/index.css'),
-    scssDependentFile = path.join(__dirname, '/test.scss'),
-    scssIndexFile = path.join(__dirname, '/index.scss');
+    test_cssFile = path.join(__dirname, '/test.css'),
+    test_sassFile = path.join(__dirname, '/test.sass'),
+    test_scssFile = path.join(__dirname, '/test.scss'),
+    index_cssFile = path.join(__dirname, '/index.css'),
+    index_sassFile = path.join(__dirname, '/index.sass'),
+    index_scssFile = path.join(__dirname, '/index.scss');
 
 describe('Creating middleware', function () {
 
@@ -28,7 +29,7 @@ describe('Creating middleware', function () {
 
 });
 
-describe('Using middleware', function () {
+describe('Using middleware to compile .scss', function () {
   var server = connect()
     .use(middleware({
       src: __dirname,
@@ -40,15 +41,15 @@ describe('Using middleware', function () {
     });
 
   beforeEach(function (done) {
-    fs.exists(cssFile, function (exists) {
+    fs.exists(test_cssFile, function (exists) {
       if (exists) {
-        fs.unlink(cssFile);
+        fs.unlink(test_cssFile);
       }
     });
 
-    fs.exists(cssIndexFile, function (exists) {
+    fs.exists(index_cssFile, function (exists) {
       if (exists) {
-        fs.unlink(cssIndexFile);
+        fs.unlink(index_cssFile);
       }
     });
 
@@ -66,7 +67,7 @@ describe('Using middleware', function () {
     });
 
     it('serves the compiled contents of the relative scss file', function (done) {
-      var filesrc = fs.readFileSync(scssFile),
+      var filesrc = fs.readFileSync(test_scssFile),
           result = sass.renderSync({ data: filesrc.toString() });
       request(server)
         .get('/test.css')
@@ -74,8 +75,8 @@ describe('Using middleware', function () {
         .expect(200, done);
     });
 
-    it('writes the file contents out to the expected file', function (done) {
-      var filesrc = fs.readFileSync(scssFile),
+    it('writes the compiled contents out to the expected file', function (done) {
+      var filesrc = fs.readFileSync(test_scssFile),
           result = sass.renderSync({ data: filesrc.toString() });
       request(server)
         .get('/test.css')
@@ -85,8 +86,8 @@ describe('Using middleware', function () {
             done(err);
           } else {
             (function checkFile() {
-              if (fs.existsSync(cssFile)) {
-                fs.readFileSync(cssFile).toString().should.equal(result.css.toString());
+              if (fs.existsSync(test_cssFile)) {
+                fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
                 done();
               } else {
                 setTimeout(checkFile, 25);
@@ -111,20 +112,29 @@ describe('Using middleware', function () {
 
   describe('compiling files with dependencies (source file contains includes)', function() {
 
-    it('serves the expected result', function (done) {
-      var filesrc = fs.readFileSync(scssIndexFile),
+    it ('serves the compiled contents of the relative scss file', function (done) {
+      var filesrc = fs.readFileSync(index_scssFile),
           result = sass.renderSync({ data: filesrc.toString() });
       request(server)
         .get('/index.css')
-        .expect('Content-Type', /css/)
+        .expect(result.css.toString())
+        .expect(200, done);
+    });
+
+    it('writes the compiled contents out to the expected file', function (done) {
+      var filesrc = fs.readFileSync(index_scssFile),
+          result = sass.renderSync({ data: filesrc.toString() });
+
+      request(server)
+        .get('/index.css')
         .expect(result.css.toString())
         .expect(200, function (err) {
           if (err) {
             done(err);
           } else {
             (function checkFile() {
-              if (fs.existsSync(cssIndexFile)) {
-                fs.readFileSync(cssIndexFile).toString().should.equal(result.css.toString());
+              if (fs.existsSync(index_cssFile)) {
+                fs.readFileSync(index_cssFile).toString().should.equal(result.css.toString());
                 done();
               } else {
                 setTimeout(checkFile, 25);
@@ -140,19 +150,19 @@ describe('Using middleware', function () {
         .get('/index.css')
         .expect(200, function() {
           (function checkInitialFile() {
-            fs.stat(cssIndexFile, function(err, initialDate) {
+            fs.stat(index_cssFile, function(err, initialDate) {
               if (initialDate != undefined) {
-                fs.appendFile(scssDependentFile, '\nbody { background: red; }', function(err, data) {
+                fs.appendFile(test_scssFile, '\nbody { background: red; }', function(err, data) {
                   if (err) throw err;
 
-                  var filesrc = fs.readFileSync(scssIndexFile),
+                  var filesrc = fs.readFileSync(index_scssFile),
                       result = sass.renderSync({ data: filesrc.toString() });
 
                   request(server)
                     .get('/index.css')
                     .expect(200, function() {
                       (function checkRecompiledFile() {
-                        var cont = fs.readFileSync(cssIndexFile).toString();
+                        var cont = fs.readFileSync(index_cssFile).toString();
                         if (cont === result.css.toString()) {
                           done();
                         } else {
@@ -170,8 +180,8 @@ describe('Using middleware', function () {
 
       // clean
       after(function(){
-        var reset = fs.readFileSync(scssDependentFile).toString().replace('\nbody { background: red; }', '');
-        fs.writeFileSync(scssDependentFile, reset, { flag: 'w' });
+        var reset = fs.readFileSync(test_scssFile).toString().replace('\nbody { background: red; }', '');
+        fs.writeFileSync(test_scssFile, reset, { flag: 'w' });
       });
 
     });
@@ -182,7 +192,7 @@ describe('Using middleware', function () {
 
     // alter
     before(function(){
-      fs.appendFileSync(scssDependentFile, '\nbody { background;: red; }');
+      fs.appendFileSync(test_scssFile, '\nbody { background;: red; }');
     })
 
     it('if error is in the main file', function(done) {
@@ -201,8 +211,8 @@ describe('Using middleware', function () {
 
     // clean
     after(function(){
-      var reset = fs.readFileSync(scssDependentFile).toString().replace('\nbody { background;: red; }', '');
-      fs.writeFileSync(scssDependentFile, reset, { flag: 'w' });
+      var reset = fs.readFileSync(test_scssFile).toString().replace('\nbody { background;: red; }', '');
+      fs.writeFileSync(test_scssFile, reset, { flag: 'w' });
     });
 
   });
