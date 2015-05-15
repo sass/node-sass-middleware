@@ -21,7 +21,7 @@ var imports = {};
  *    `outputStyle` Sass output style (nested or compressed), nested by default
  *    `force`       Always re-compile
  *    `debug`       Output debugging information
- *    `response`    True (default) to write output directly to response 
+ *    `response`    True (default) to write output directly to response
  *                   instead of to a file
  *    `error`       A function to be called when something goes wrong
  *
@@ -71,6 +71,9 @@ module.exports = function(options) {
   // Enable debug output
   var debug = options.debug;
 
+  var indentedSyntax = options.indentedSyntax || null;
+  var sassExtension = (indentedSyntax === true) ? '.sass' : '.scss';
+
   // Default compile callback
   options.compile = options.compile || function() {
     return sass;
@@ -91,14 +94,14 @@ module.exports = function(options) {
       next();
     } else {
       var cssPath = join(dest, path),
-          sassPath = join(src, path.replace(/\.css$/, '.scss')),
+          sassPath = join(src, path.replace(/\.css$/, sassExtension)),
           sassDir = dirname(sassPath);
 
       if (root) {
         cssPath = join(root, dest, path.replace(new RegExp('^' + dest), ''));
         sassPath = join(root, src, path
             .replace(new RegExp('^' + dest), '')
-            .replace(/\.css$/, '.scss'));
+            .replace(/\.css$/, sassExtension));
         sassDir = dirname(sassPath);
       }
 
@@ -185,7 +188,7 @@ module.exports = function(options) {
 
       // Compare mtimes
       fs.stat(sassPath, function(err, sassStats){
-        if (err) { 
+        if (err) {
           error(err);
           return next();
         }
