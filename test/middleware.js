@@ -179,11 +179,10 @@ describe('Using middleware to compile .scss', function () {
         });
 
       // clean
-      after(function(){
+      after(function() {
         var reset = fs.readFileSync(test_scssFile).toString().replace('\nbody { background: red; }', '');
         fs.writeFileSync(test_scssFile, reset, { flag: 'w' });
       });
-
     });
 
   });
@@ -191,9 +190,9 @@ describe('Using middleware to compile .scss', function () {
   describe('compiling files with errors moves to next middleware with err', function() {
 
     // alter
-    before(function(){
+    before(function() {
       fs.appendFileSync(test_scssFile, '\nbody { background;: red; }');
-    })
+    });
 
     it('if error is in the main file', function(done) {
       request(server)
@@ -210,11 +209,199 @@ describe('Using middleware to compile .scss', function () {
     });
 
     // clean
-    after(function(){
+    after(function() {
       var reset = fs.readFileSync(test_scssFile).toString().replace('\nbody { background;: red; }', '');
       fs.writeFileSync(test_scssFile, reset, { flag: 'w' });
     });
+  });
 
+});
+
+describe('Using middleware to compile .sass', function () {
+  var server = connect()
+    .use(middleware({
+      src: __dirname,
+      dest: __dirname,
+      indentedSyntax: true
+    }))
+    .use(function(err, req, res, next) {
+      res.statusCode = 500;
+      res.end(err.message);
+    });
+
+  beforeEach(function (done) {
+    fs.exists(test_cssFile, function (exists) {
+      if (exists) {
+        fs.unlink(test_cssFile);
+      }
+    });
+
+    fs.exists(index_cssFile, function (exists) {
+      if (exists) {
+        fs.unlink(index_cssFile);
+      }
+    });
+
+    done();
+  });
+
+  describe('successful file request', function () {
+
+    it('serves a file with 200 Content-Type css', function (done) {
+      request(server)
+        .get('/test.css')
+        .set('Accept', 'text/css')
+        .expect('Content-Type', /css/)
+        .expect(200, done);
+    });
+
+    it('serves the compiled contents of the relative sass file', function (done) {
+      var filesrc = fs.readFileSync(test_sassFile),
+          result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+      request(server)
+        .get('/test.css')
+        .expect(result.css.toString())
+        .expect(200, done);
+    });
+
+    it('writes the compiled contents out to the expected file', function (done) {
+      var filesrc = fs.readFileSync(test_sassFile),
+          result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+      request(server)
+        .get('/test.css')
+        .expect(result.css.toString())
+        .expect(200, function (err) {
+          if (err) {
+            done(err);
+          } else {
+            (function checkFile() {
+              if (fs.existsSync(test_cssFile)) {
+                fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
+                done();
+              } else {
+                setTimeout(checkFile, 25);
+              }
+            }());
+          }
+        });
+    });
+
+  });
+
+  describe('unsucessful file request', function () {
+
+    it('moves to next middleware', function (done) {
+      request(server)
+        .get('/does-not-exist.css')
+        .expect('Cannot GET /does-not-exist.css\n')
+        .expect(404, done);
+    });
+
+  });
+
+  describe('compiling files with dependencies (source file contains includes)', function() {
+
+    it ('serves the compiled contents of the relative sass file', function (done) {
+      var filesrc = fs.readFileSync(index_sassFile),
+          result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+      request(server)
+        .get('/index.css')
+        .expect(result.css.toString())
+        .expect(200, done);
+    });
+
+    it('writes the compiled contents out to the expected file', function (done) {
+      var filesrc = fs.readFileSync(index_sassFile),
+          result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+
+      request(server)
+        .get('/index.css')
+        .expect(result.css.toString())
+        .expect(200, function (err) {
+          if (err) {
+            done(err);
+          } else {
+            (function checkFile() {
+              if (fs.existsSync(index_cssFile)) {
+                fs.readFileSync(index_cssFile).toString().should.equal(result.css.toString());
+                done();
+              } else {
+                setTimeout(checkFile, 25);
+              }
+            }());
+          }
+        });
+    });
+
+    it('any change in a dependent file, force recompiling', function(done) {
+
+      request(server)
+        .get('/index.css')
+        .expect(200, function() {
+          (function checkInitialFile() {
+            fs.stat(index_cssFile, function(err, initialDate) {
+              if (initialDate != undefined) {
+                fs.appendFile(test_sassFile, '\nbody\n\tbackground: red', function(err, data) {
+                  if (err) throw err;
+
+                  var filesrc = fs.readFileSync(index_sassFile),
+                      result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+
+                  request(server)
+                    .get('/index.css')
+                    .expect(200, function() {
+                      (function checkRecompiledFile() {
+                        var cont = fs.readFileSync(index_cssFile).toString();
+                        if (cont === result.css.toString()) {
+                          done();
+                        } else {
+                          setTimeout(checkRecompiledFile, 10);
+                        }
+                      }());
+                    });
+                });
+              } else {
+                setTimeout(checkInitialFile, 10);
+              }
+            });
+          }());
+        });
+
+      // clean
+      after(function() {
+        var reset = fs.readFileSync(test_sassFile).toString().replace('\nbody\n\tbackground: red', '');
+        fs.writeFileSync(test_sassFile, reset, { flag: 'w' });
+      });
+    });
+
+  });
+
+  describe('compiling files with errors moves to next middleware with err', function() {
+
+    // alter
+    before(function() {
+      fs.appendFileSync(test_sassFile, '\nbody\n\tbackground;: red');
+    });
+
+    it('if error is in the main file', function(done) {
+      request(server)
+        .get('/test.css')
+        .expect('property "background" must be followed by a \':\'')
+        .expect(500, done);
+    });
+
+    it('if error is in imported file', function(done) {
+      request(server)
+        .get('/index.css')
+        .expect('property "background" must be followed by a \':\'')
+        .expect(500, done);
+    });
+
+    // clean
+    after(function() {
+      var reset = fs.readFileSync(test_sassFile).toString().replace('\nbody\n\tbackground;: red', '');
+      fs.writeFileSync(test_sassFile, reset, { flag: 'w' });
+    });
   });
 
 });
