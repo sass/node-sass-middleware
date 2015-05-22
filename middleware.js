@@ -77,6 +77,8 @@ module.exports = function(options) {
   var indentedSyntax = options.indentedSyntax || null;
   var sassExtension = (indentedSyntax === true) ? '.sass' : '.scss';
 
+  var sourceMap = options.sourceMap || null;
+
   // Default compile callback
   options.compile = options.compile || function() {
     return sass;
@@ -108,6 +110,12 @@ module.exports = function(options) {
         sassDir = dirname(sassPath);
       }
 
+      if (sourceMap === true) {
+        var cssMapPath = cssPath + '.map';
+      } else if (typeof sourceMap === 'string') {
+        var cssMapPath = join(dirname(cssPath), sourceMap);
+      }
+
       if (debug) {
         log('source', sassPath);
         log('dest', options.response ? '<response>' : cssPath);
@@ -133,7 +141,13 @@ module.exports = function(options) {
         } else {
           data = result.css;
 
-          if (debug) { log('render', options.response ? '<response>' : sassPath); }
+          if (debug) {
+            log('render', options.response ? '<response>' : sassPath);
+
+            if (sourceMap) {
+              log('render', cssMapPath);
+            }
+          }
           imports[sassPath] = result.stats.includedFiles;
 
           // If response is falsey, also write to file
@@ -149,6 +163,20 @@ module.exports = function(options) {
                 }
               });
             });
+
+            if (sourceMap != null) {
+              mkdirp(dirname(cssMapPath), '0700', function(err) {
+                if (err) {
+                  return error(err);
+                }
+
+                fs.writeFile(cssMapPath, result.map, 'utf8', function(err) {
+                  if (err) {
+                    return error(err);
+                  }
+                });
+              });
+            }
           }
         }
 
@@ -174,7 +202,9 @@ module.exports = function(options) {
             data: str,
             includePaths: [sassDir].concat(options.includePaths || []),
             outputStyle: options.outputStyle,
-            indentedSyntax: indentedSyntax
+            indentedSyntax: indentedSyntax,
+            outFile: cssPath,
+            sourceMap: sourceMap,
           }, done);
         });
       };
