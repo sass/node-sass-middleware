@@ -191,21 +191,21 @@ module.exports = function(options) {
       var compile = function() {
         if (debug) { log('read', cssPath); }
 
-        fs.readFile(sassPath, 'utf8', function(err, str) {
-          if (err) {
-            error(err);
+        fs.exists(sassPath, function(exists) {
+          if (!exists) {
             return next();
+          } else {
+            var style = options.compile();
+            delete imports[sassPath];
+            style.render({
+              file: sassPath,
+              includePaths: [sassDir].concat(options.includePaths || []),
+              outputStyle: options.outputStyle,
+              indentedSyntax: indentedSyntax,
+              outFile: cssPath,
+              sourceMap: sourceMap,
+            }, done);
           }
-          var style = options.compile();
-          delete imports[sassPath];
-          style.render({
-            data: str,
-            includePaths: [sassDir].concat(options.includePaths || []),
-            outputStyle: options.outputStyle,
-            indentedSyntax: indentedSyntax,
-            outFile: cssPath,
-            sourceMap: sourceMap,
-          }, done);
         });
       };
 
