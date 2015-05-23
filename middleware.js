@@ -77,6 +77,8 @@ module.exports = function(options) {
   var indentedSyntax = options.indentedSyntax || null;
   var sassExtension = (indentedSyntax === true) ? '.sass' : '.scss';
 
+  var sourceMap = options.sourceMap || null;
+
   // Default compile callback
   options.compile = options.compile || function() {
     return sass;
@@ -133,7 +135,13 @@ module.exports = function(options) {
         } else {
           data = result.css;
 
-          if (debug) { log('render', options.response ? '<response>' : sassPath); }
+          if (debug) {
+            log('render', options.response ? '<response>' : sassPath);
+
+            if (sourceMap) {
+              log('render', this.options.sourceMap);
+            }
+          }
           imports[sassPath] = result.stats.includedFiles;
 
           // If response is falsey, also write to file
@@ -149,6 +157,21 @@ module.exports = function(options) {
                 }
               });
             });
+
+            if (sourceMap) {
+              var sourceMapPath = this.options.sourceMap;
+              mkdirp(dirname(sourceMapPath), '0700', function(err) {
+                if (err) {
+                  return error(err);
+                }
+
+                fs.writeFile(sourceMapPath, result.map, 'utf8', function(err) {
+                  if (err) {
+                    return error(err);
+                  }
+                });
+              });
+            }
           }
         }
 
@@ -163,18 +186,20 @@ module.exports = function(options) {
       var compile = function() {
         if (debug) { log('read', cssPath); }
 
-        fs.readFile(sassPath, 'utf8', function(err, str) {
-          if (err) {
-            error(err);
+        fs.exists(sassPath, function(exists) {
+          if (!exists) {
             return next();
           }
+
           var style = options.compile();
           delete imports[sassPath];
           style.render({
-            data: str,
+            file: sassPath,
             includePaths: [sassDir].concat(options.includePaths || []),
             outputStyle: options.outputStyle,
-            indentedSyntax: indentedSyntax
+            indentedSyntax: indentedSyntax,
+            outFile: cssPath,
+            sourceMap: sourceMap,
           }, done);
         });
       };

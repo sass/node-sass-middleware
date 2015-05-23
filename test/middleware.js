@@ -11,7 +11,8 @@ var fs = require('fs'),
     test_scssFile = path.join(__dirname, '/test.scss'),
     index_cssFile = path.join(__dirname, '/index.css'),
     index_sassFile = path.join(__dirname, '/index.sass'),
-    index_scssFile = path.join(__dirname, '/index.scss');
+    index_scssFile = path.join(__dirname, '/index.scss'),
+    index_sourceMap = path.join(__dirname, '/index.css.map');
 
 describe('Creating middleware', function () {
 
@@ -50,6 +51,12 @@ describe('Using middleware to compile .scss', function () {
     fs.exists(index_cssFile, function (exists) {
       if (exists) {
         fs.unlink(index_cssFile);
+      }
+    });
+
+    fs.exists(index_sourceMap, function (exists) {
+      if (exists) {
+        fs.unlink(index_sourceMap);
       }
     });
 
@@ -187,6 +194,43 @@ describe('Using middleware to compile .scss', function () {
 
   });
 
+  describe('generating source-map for compiled css', function() {
+    var server = connect()
+      .use(middleware({
+        src: __dirname,
+        dest: __dirname,
+        sourceMap: true
+      }))
+      .use(function(err, req, res, next) {
+        res.statusCode = 500;
+        res.end(err.message);
+      });
+
+    it('generates source-map with correct contents', function(done) {
+      request(server)
+        .get('/index.css')
+        .expect(200, function() {
+          var filesrc = fs.readFileSync(index_scssFile),
+              result = sass.renderSync({ file: index_scssFile, outFile: index_cssFile, sourceMap: true });
+
+          (function checkFile() {
+            fs.exists(index_sourceMap, function(exists) {
+              if (exists) {
+                var cont = fs.readFileSync(index_sourceMap).toString();
+                if (cont === result.map.toString()) {
+                  done();
+                }
+              } else {
+                setTimeout(checkFile, 10);
+              }
+            });
+          }());
+        });
+
+    });
+
+  });
+
   describe('compiling files with errors moves to next middleware with err', function() {
 
     // alter
@@ -239,6 +283,12 @@ describe('Using middleware to compile .sass', function () {
     fs.exists(index_cssFile, function (exists) {
       if (exists) {
         fs.unlink(index_cssFile);
+      }
+    });
+
+    fs.exists(index_sourceMap, function (exists) {
+      if (exists) {
+        fs.unlink(index_sourceMap);
       }
     });
 
@@ -334,7 +384,6 @@ describe('Using middleware to compile .sass', function () {
     });
 
     it('any change in a dependent file, force recompiling', function(done) {
-
       request(server)
         .get('/index.css')
         .expect(200, function() {
@@ -372,6 +421,42 @@ describe('Using middleware to compile .sass', function () {
         var reset = fs.readFileSync(test_sassFile).toString().replace('\nbody\n\tbackground: red', '');
         fs.writeFileSync(test_sassFile, reset, { flag: 'w' });
       });
+    });
+
+  });
+
+  describe('generating source-map for compiled css', function() {
+    var server = connect()
+      .use(middleware({
+        src: __dirname,
+        dest: __dirname,
+        indentedSyntax: true,
+        sourceMap: true
+      }))
+      .use(function(err, req, res, next) {
+        res.statusCode = 500;
+        res.end(err.message);
+      });
+
+    it('generates source-map with correct contents', function(done) {
+      request(server)
+        .get('/index.css')
+        .expect(200, function() {
+          var filesrc = fs.readFileSync(index_scssFile),
+              result = sass.renderSync({ file: index_sassFile, indentedSyntax: true, outFile: index_cssFile, sourceMap: true });
+
+          (function checkFile() {
+            fs.exists(index_sourceMap, function(exists) {
+              if (exists) {
+                var cont = fs.readFileSync(index_sourceMap).toString();
+                if (cont === result.map.toString()) {
+                  return done();
+                }
+              }
+              setTimeout(checkFile, 10);
+            });
+          }());
+        });
     });
 
   });
