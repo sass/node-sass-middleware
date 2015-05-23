@@ -78,7 +78,6 @@ module.exports = function(options) {
   var sassExtension = (indentedSyntax === true) ? '.sass' : '.scss';
 
   var sourceMap = options.sourceMap || null;
-  var cssMapPath = null;
 
   // Default compile callback
   options.compile = options.compile || function() {
@@ -111,12 +110,6 @@ module.exports = function(options) {
         sassDir = dirname(sassPath);
       }
 
-      if (sourceMap === true) {
-        cssMapPath = cssPath + '.map';
-      } else if (typeof sourceMap === 'string') {
-        cssMapPath = join(dirname(cssPath), sourceMap);
-      }
-
       if (debug) {
         log('source', sassPath);
         log('dest', options.response ? '<response>' : cssPath);
@@ -146,7 +139,7 @@ module.exports = function(options) {
             log('render', options.response ? '<response>' : sassPath);
 
             if (sourceMap) {
-              log('render', cssMapPath);
+              log('render', this.options.sourceMap);
             }
           }
           imports[sassPath] = result.stats.includedFiles;
@@ -166,12 +159,13 @@ module.exports = function(options) {
             });
 
             if (sourceMap) {
-              mkdirp(dirname(cssMapPath), '0700', function(err) {
+              var sourceMapPath = this.options.sourceMap;
+              mkdirp(dirname(sourceMapPath), '0700', function(err) {
                 if (err) {
                   return error(err);
                 }
 
-                fs.writeFile(cssMapPath, result.map, 'utf8', function(err) {
+                fs.writeFile(sourceMapPath, result.map, 'utf8', function(err) {
                   if (err) {
                     return error(err);
                   }
@@ -195,6 +189,7 @@ module.exports = function(options) {
         fs.exists(sassPath, function(exists) {
           if (!exists) {
             return next();
+          }
 
           var style = options.compile();
           delete imports[sassPath];
