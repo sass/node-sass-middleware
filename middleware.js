@@ -78,6 +78,7 @@ module.exports = function(options) {
   var sassExtension = (indentedSyntax === true) ? '.sass' : '.scss';
 
   var sourceMap = options.sourceMap || null;
+  var cssMapPath = null;
 
   // Default compile callback
   options.compile = options.compile || function() {
@@ -111,9 +112,9 @@ module.exports = function(options) {
       }
 
       if (sourceMap === true) {
-        var cssMapPath = cssPath + '.map';
+        cssMapPath = cssPath + '.map';
       } else if (typeof sourceMap === 'string') {
-        var cssMapPath = join(dirname(cssPath), sourceMap);
+        cssMapPath = join(dirname(cssPath), sourceMap);
       }
 
       if (debug) {
@@ -164,7 +165,7 @@ module.exports = function(options) {
               });
             });
 
-            if (sourceMap != null) {
+            if (sourceMap) {
               mkdirp(dirname(cssMapPath), '0700', function(err) {
                 if (err) {
                   return error(err);
@@ -194,18 +195,17 @@ module.exports = function(options) {
         fs.exists(sassPath, function(exists) {
           if (!exists) {
             return next();
-          } else {
-            var style = options.compile();
-            delete imports[sassPath];
-            style.render({
-              file: sassPath,
-              includePaths: [sassDir].concat(options.includePaths || []),
-              outputStyle: options.outputStyle,
-              indentedSyntax: indentedSyntax,
-              outFile: cssPath,
-              sourceMap: sourceMap,
-            }, done);
-          }
+
+          var style = options.compile();
+          delete imports[sassPath];
+          style.render({
+            file: sassPath,
+            includePaths: [sassDir].concat(options.includePaths || []),
+            outputStyle: options.outputStyle,
+            indentedSyntax: indentedSyntax,
+            outFile: cssPath,
+            sourceMap: sourceMap,
+          }, done);
         });
       };
 

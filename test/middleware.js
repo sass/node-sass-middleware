@@ -207,7 +207,6 @@ describe('Using middleware to compile .scss', function () {
       });
 
     it('generates source-map with correct contents', function(done) {
-
       request(server)
         .get('/index.css')
         .expect(200, function() {
@@ -385,7 +384,6 @@ describe('Using middleware to compile .sass', function () {
     });
 
     it('any change in a dependent file, force recompiling', function(done) {
-
       request(server)
         .get('/index.css')
         .expect(200, function() {
@@ -441,7 +439,6 @@ describe('Using middleware to compile .sass', function () {
       });
 
     it('generates source-map with correct contents', function(done) {
-
       request(server)
         .get('/index.css')
         .expect(200, function() {
@@ -453,15 +450,13 @@ describe('Using middleware to compile .sass', function () {
               if (exists) {
                 var cont = fs.readFileSync(index_sourceMap).toString();
                 if (cont === result.map.toString()) {
-                  done();
+                  return done();
                 }
-              } else {
-                setTimeout(checkFile, 10);
               }
+              setTimeout(checkFile, 10);
             });
           }());
         });
-
     });
 
   });
