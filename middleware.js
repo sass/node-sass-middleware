@@ -145,8 +145,24 @@ module.exports = function(options) {
         }
         imports[sassPath] = result.stats.includedFiles;
 
+        var cssDone = true;
+        var sourceMapDone = true;
+
+        function doneWriting() {
+          if (cssDone && sourceMapDone) {
+            res.writeHead(200, {
+              'Content-Type': 'text/css',
+              'Cache-Control': 'max-age=0'
+            });
+            res.end(data);
+          }
+        }
+
         // If response is falsey, also write to file
         if (!options.response) {
+          cssDone = false;
+          sourceMapDone = !sourceMap;
+
           mkdirp(dirname(cssPath), '0700', function(err) {
             if (err) {
               return error(err);
@@ -156,6 +172,8 @@ module.exports = function(options) {
               if (err) {
                 return error(err);
               }
+              cssDone = true;
+              doneWriting();
             });
           });
 
@@ -170,16 +188,14 @@ module.exports = function(options) {
                 if (err) {
                   return error(err);
                 }
+                sourceMapDone = true;
+                doneWriting();
               });
             });
           }
+        } else {
+          doneWriting();
         }
-
-        res.writeHead(200, {
-          'Content-Type': 'text/css',
-          'Cache-Control': 'max-age=0'
-        });
-        res.end(data);
       }
 
       // Compile to cssPath

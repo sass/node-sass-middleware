@@ -92,14 +92,12 @@ describe('Using middleware to compile .scss', function () {
           if (err) {
             done(err);
           } else {
-            (function checkFile() {
-              if (fs.existsSync(test_cssFile)) {
-                fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
-                done();
-              } else {
-                setTimeout(checkFile, 25);
-              }
-            }());
+            if (fs.existsSync(test_cssFile)) {
+              fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
+              done();
+            } else {
+              done(new Error('file was not written before request ends'));
+            }
           }
         });
     });
