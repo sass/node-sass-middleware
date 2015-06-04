@@ -57,8 +57,16 @@ module.exports = function(options) {
     options = { src: options };
   }
 
+  var sassMiddlewareError = null;
+
   // This function will be called if something goes wrong
-  var error = options.error || function() { };
+  var error = function(err) {
+    if (options.error) {
+      options.error(err);
+    }
+
+    sassMiddlewareError = err;
+  };
 
   // Source directory (required)
   var src = options.src || function() {
@@ -150,11 +158,15 @@ module.exports = function(options) {
 
         function doneWriting() {
           if (cssDone && sourceMapDone) {
-            res.writeHead(200, {
-              'Content-Type': 'text/css',
-              'Cache-Control': 'max-age=0'
-            });
-            res.end(data);
+            if (options.response === false) {
+              next(sassMiddlewareError);
+            } else {
+              res.writeHead(200, {
+                'Content-Type': 'text/css',
+                'Cache-Control': 'max-age=0'
+              });
+              res.end(data);
+            }
           }
         }
 
