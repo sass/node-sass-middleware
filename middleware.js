@@ -14,17 +14,18 @@ var imports = {};
  *
  * Options:
  *
- *    `src`         Source directory used to find .scss files
- *    `dest`        Destination directory used to output .css files
- *                   when undefined defaults to `src`
- *    `root`        A base path for both source and destination directories
- *    `outputStyle` Sass output style (nested or compressed), nested by default
+ *    `src`            Source directory used to find .scss files
+ *    `dest`           Destination directory used to output .css files when undefined defaults to `src`
+ *    `root`           A base path for both source and destination directories
+ *    `outputStyle`    Sass output style (nested or compressed), nested by default
  *    `indentedSyntax` Use standard SCSS sytax (Sassy CSS) or the cleaner SASS syntax
- *    `force`       Always re-compile
- *    `debug`       Output debugging information
- *    `response`    True (default) to write output directly to response
- *                   instead of to a file
- *    `error`       A function to be called when something goes wrong
+ *    `prefix`         It will tell the sass compiler that any request file will always be prefixed 
+ *                     with <prefix> and this prefix should be ignored. 
+ *    `sourceMap`      It will generate the sass sourcemap.
+ *    `force`          Always re-compile
+ *    `debug`          Output debugging information
+ *    `response`       True (default) to write output directly to response instead of to a file
+ *    `error`          A function to be called when something goes wrong
  *
  * Examples:
  *
