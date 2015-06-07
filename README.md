@@ -16,7 +16,7 @@ Connect/Express middleware for [node-sass](https://github.com/sass/node-sass).
 
 Recompile `.scss` or `.sass` files automatically for connect and express based http servers.
 
-## Options
+### Options
 //TODO Write this full doc
 
 ### Connect example
