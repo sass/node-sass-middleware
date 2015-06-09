@@ -57,8 +57,16 @@ module.exports = function(options) {
     options = { src: options };
   }
 
+  var sassMiddlewareError = null;
+
   // This function will be called if something goes wrong
-  var error = options.error || function() { };
+  var error = function(err) {
+    if (options.error) {
+      options.error(err);
+    }
+
+    sassMiddlewareError = err;
+  };
 
   // Source directory (required)
   var src = options.src || function() {
@@ -132,54 +140,74 @@ module.exports = function(options) {
           error(err);
 
           return next(err);
-        } else {
-          data = result.css;
+        }
 
-          if (debug) {
-            log('render', options.response ? '<response>' : sassPath);
+        data = result.css;
 
-            if (sourceMap) {
-              log('render', this.options.sourceMap);
-            }
+        if (debug) {
+          log('render', options.response ? '<response>' : sassPath);
+
+          if (sourceMap) {
+            log('render', this.options.sourceMap);
           }
-          imports[sassPath] = result.stats.includedFiles;
+        }
+        imports[sassPath] = result.stats.includedFiles;
 
-          // If response is falsey, also write to file
-          if (!options.response) {
-            mkdirp(dirname(cssPath), '0700', function(err) {
-              if (err) {
-                return error(err);
-              }
+        var cssDone = true;
+        var sourceMapDone = true;
 
-              fs.writeFile(cssPath, data, 'utf8', function(err) {
-                if (err) {
-                  return error(err);
-                }
+        function doneWriting() {
+          if (cssDone && sourceMapDone) {
+            if (options.response === false) {
+              next(sassMiddlewareError);
+            } else {
+              res.writeHead(200, {
+                'Content-Type': 'text/css',
+                'Cache-Control': 'max-age=0'
               });
-            });
-
-            if (sourceMap) {
-              var sourceMapPath = this.options.sourceMap;
-              mkdirp(dirname(sourceMapPath), '0700', function(err) {
-                if (err) {
-                  return error(err);
-                }
-
-                fs.writeFile(sourceMapPath, result.map, 'utf8', function(err) {
-                  if (err) {
-                    return error(err);
-                  }
-                });
-              });
+              res.end(data);
             }
           }
         }
 
-        res.writeHead(200, {
-          'Content-Type': 'text/css',
-          'Cache-Control': 'max-age=0'
-        });
-        res.end(data);
+        // If response is falsey, also write to file
+        if (!options.response) {
+          cssDone = false;
+          sourceMapDone = !sourceMap;
+
+          mkdirp(dirname(cssPath), '0700', function(err) {
+            if (err) {
+              return error(err);
+            }
+
+            fs.writeFile(cssPath, data, 'utf8', function(err) {
+              if (err) {
+                return error(err);
+              }
+              cssDone = true;
+              doneWriting();
+            });
+          });
+
+          if (sourceMap) {
+            var sourceMapPath = this.options.sourceMap;
+            mkdirp(dirname(sourceMapPath), '0700', function(err) {
+              if (err) {
+                return error(err);
+              }
+
+              fs.writeFile(sourceMapPath, result.map, 'utf8', function(err) {
+                if (err) {
+                  return error(err);
+                }
+                sourceMapDone = true;
+                doneWriting();
+              });
+            });
+          }
+        } else {
+          doneWriting();
+        }
       }
 
       // Compile to cssPath

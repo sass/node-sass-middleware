@@ -92,14 +92,40 @@ describe('Using middleware to compile .scss', function () {
           if (err) {
             done(err);
           } else {
-            (function checkFile() {
-              if (fs.existsSync(test_cssFile)) {
-                fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
-                done();
-              } else {
-                setTimeout(checkFile, 25);
-              }
-            }());
+            if (fs.existsSync(test_cssFile)) {
+              fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
+              done();
+            } else {
+              done(new Error('file was not written before request ends'));
+            }
+          }
+        });
+    });
+
+    it('only writes the compiled contents out to the expected file without serving them', function(done) {
+      var filesrc = fs.readFileSync(test_scssFile),
+          result = sass.renderSync({ data: filesrc.toString() }),
+          anotherResponse = 'something else',
+          server = connect()
+          .use(middleware({
+            response: false,
+            src: __dirname,
+            dest: __dirname
+          }));
+
+      server.use(function(req, res) {
+        res.end(anotherResponse);
+      });
+
+      request(server)
+        .get('/test.css')
+        .expect(anotherResponse)
+        .expect(200, function (err) {
+          if (err) {
+            done(err);
+          } else {
+            fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
+            done();
           }
         });
     });
