@@ -21,6 +21,7 @@ var imports = {};
  *    `indentedSyntax` Use standard SCSS sytax (Sassy CSS) or the cleaner SASS syntax
  *    `prefix`         It will tell the sass compiler that any request file will always be prefixed 
  *                     with <prefix> and this prefix should be ignored. 
+ *    `sourceMap`      It will generate the sass sourcemap.
  *    `force`          Always re-compile
  *    `debug`          Output debugging information
  *    `response`       True (default) to write output directly to response instead of to a file
