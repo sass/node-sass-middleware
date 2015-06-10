@@ -16,9 +16,6 @@ Connect/Express middleware for [node-sass](https://github.com/sass/node-sass).
 
 Recompile `.scss` or `.sass` files automatically for connect and express based http servers.
 
-### Options
-//TODO Write this full doc
-
 ### Connect example
 
 ```javascript
@@ -26,6 +23,7 @@ var connect = require('connect')
 var sassMiddleware = require('node-sass-middleware')
 var server = connect.createServer(
   sassMiddleware({
+      /* Options */
       src: __dirname
     , dest: __dirname + '/public'
     , debug: true
@@ -48,6 +46,7 @@ var sassMiddleware = require('node-sass-middleware');
 var path = require('path');
 var app = express();
 app.use(sassMiddleware({
+    /* Options */
     src: __dirname,
     dest: path.join(__dirname, 'public'),
     debug: true,
@@ -56,6 +55,18 @@ app.use(sassMiddleware({
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 ```
+### Options
+//TODO Add default values for each one
+ *    `src`            Source directory used to find .scss files
+ *    `dest`           Destination directory used to output .css files when undefined defaults to `src`
+ *    `root`           A base path for both source and destination directories
+ *    `outputStyle`    Sass output style (nested or compressed), nested by default
+ *    `indentedSyntax` Use standard SCSS sytax (Sassy CSS) or the cleaner SASS syntax
+ *    `prefix`         It will tell the sass compiler that any request file will always be prefixed with `<prefix>` and this prefix should be ignored. 
+ *    `force`          Always re-compile
+ *    `debug`          Output debugging information
+ *    `response`       True (default) to write output directly to response instead of to a file
+ *    `error`          A function to be called when something goes wrong
 
 ## Testing
 
