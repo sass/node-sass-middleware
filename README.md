@@ -30,7 +30,7 @@ var server = connect.createServer(
     , dest: __dirname + '/public'
     , debug: true
     , outputStyle: 'compressed'
-    , prefix:  '/prefix'
+    , prefix:  '/prefix'  // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>
   }),
   connect.static('/prefix', __dirname + '/public')
 );
@@ -52,7 +52,7 @@ app.use(sassMiddleware({
     dest: path.join(__dirname, 'public'),
     debug: true,
     outputStyle: 'compressed',
-    prefix:  '/prefix'
+    prefix:  '/prefix'  // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 ```
