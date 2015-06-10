@@ -64,7 +64,7 @@ app.use(express.static(path.join(__dirname, 'public')));
   *    `outputStyle`    -`['nested' | 'compressed']`, `'nested'` by default. Sass output style.
   *    `indentedSyntax` - `[true(.sass) | false(.scss)]`, false by default. Use standard SCSS sytax (Sassy CSS) or the cleaner SASS syntax.
   *    `prefix`         - (String) It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored. 
-  *    `sourceMap`      - `[true | false]`, false by default. Generates the sass source map. 
+  *    `sourceMap`      - `[true | false]`, false by default. It will generate the sass sourcemap. 
   *    `force`          - `[true | false]`, false by default. Always re-compile.
   *    `debug`          - `[true | false]`, false by default. Output debugging information.
   *    `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
