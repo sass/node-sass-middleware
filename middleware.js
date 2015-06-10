@@ -19,7 +19,11 @@ var imports = {};
  *    `root`           A base path for both source and destination directories
  *    `outputStyle`    Sass output style (nested or compressed), nested by default
  *    `indentedSyntax` Use standard SCSS sytax (Sassy CSS) or the cleaner SASS syntax
- *    `prefix`         //TODO Write the proper doc        
+ *    `prefix`         A prefix to be ignored for any request file.
+ * it will tell the sass compiler that request file will always be prefixed 
+ * with /stylesheets and this prefix should be ignored, thus for a request 
+ * for /stylesheets/app.css, the sass middleware will look for the file /sass/app.scss 
+ * rather than /sass/stylesheets/app.scss.
  *    `force`          Always re-compile
  *    `debug`          Output debugging information
  *    `response`       True (default) to write output directly to response instead of to a file
