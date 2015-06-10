@@ -56,17 +56,17 @@ app.use(sassMiddleware({
 app.use(express.static(path.join(__dirname, 'public')));
 ```
 ### Options
-//TODO Add default values for each one
- *    `src`            Source directory used to find .scss files
- *    `dest`           Destination directory used to output .css files when undefined defaults to `src`
- *    `root`           A base path for both source and destination directories
- *    `outputStyle`    Sass output style (nested or compressed), nested by default
- *    `indentedSyntax` Use standard SCSS sytax (Sassy CSS) or the cleaner SASS syntax
- *    `prefix`         It will tell the sass compiler that any request file will always be prefixed with `<prefix>` and this prefix should be ignored. 
- *    `force`          Always re-compile
- *    `debug`          Output debugging information
- *    `response`       True (default) to write output directly to response instead of to a file
- *    `error`          A function to be called when something goes wrong
+
+ *    `src`            Source directory used to find `.scss` or `.sass` files.
+ *    `dest`           Destination directory used to output `.css` files (when undefined defaults to `src`).
+ *    `root`           A base path for both source and destination directories.
+ *    `outputStyle`    `['nested' | 'compressed']` `nested` by default. Sass output style.
+ *    `indentedSyntax` `[True(.sass) | False(.scss)]` False by default. Use standard SCSS sytax (Sassy CSS) or the cleaner SASS syntax.
+ *    `prefix`         It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored. 
+ *    `force`          `[True | False]` False by default. Always re-compile.
+ *    `debug`          `[True | False]` False by default. Output debugging information.
+ *    `response`       `[True | False]` True by default. To write output directly to response instead of to a file.
+ *    `error`          A function to be called when something goes wrong.
 
 ## Testing
 
