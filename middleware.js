@@ -19,8 +19,8 @@ var imports = {};
  *    `root`           A base path for both source and destination directories
  *    `outputStyle`    Sass output style (nested or compressed), nested by default
  *    `indentedSyntax` Use standard SCSS sytax (Sassy CSS) or the cleaner SASS syntax
- *    `prefix`         It will tell the sass compiler that any request file will always be prefixed 
- *                     with <prefix> and this prefix should be ignored. 
+ *    `prefix`         It will tell the sass compiler that any request file will always be prefixed
+ *                     with <prefix> and this prefix should be ignored.
  *    `sourceMap`      It will generate the sass sourcemap.
  *    `force`          Always re-compile
  *    `debug`          Output debugging information
@@ -220,8 +220,10 @@ module.exports = function(options) {
             return next();
           }
 
+          imports[sassPath] = undefined;
+
           var style = options.compile();
-          delete imports[sassPath];
+
           style.render({
             file: sassPath,
             includePaths: [sassDir].concat(options.includePaths || []),
@@ -234,7 +236,7 @@ module.exports = function(options) {
       };
 
       // Force
-      if (force){
+      if (force) {
         return compile();
       }
 
@@ -245,14 +247,13 @@ module.exports = function(options) {
       }
 
       // Compare mtimes
-      fs.stat(sassPath, function(err, sassStats){
+      fs.stat(sassPath, function(err, sassStats) {
         if (err) {
           error(err);
           return next();
         }
-        fs.stat(cssPath, function(err, cssStats){
-          // CSS has not been compiled, compile it!
-          if (err) {
+        fs.stat(cssPath, function(err, cssStats) {
+          if (err) { // CSS has not been compiled, compile it!
             if ('ENOENT' == err.code) {
               if (debug) { log('not found', cssPath); }
               compile();
@@ -260,12 +261,10 @@ module.exports = function(options) {
               next(err);
             }
           } else {
-            // Source has changed, compile it
-            if (sassStats.mtime > cssStats.mtime) {
+            if (sassStats.mtime > cssStats.mtime) { // Source has changed, compile it
               if (debug) { log('modified', cssPath); }
               compile();
-            // Already compiled, check imports
-            } else {
+            } else { // Already compiled, check imports
               checkImports(sassPath, cssStats.mtime, function(changed) {
                 if (debug && changed && changed.length) {
                   changed.forEach(function(path) {
