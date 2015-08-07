@@ -14,18 +14,19 @@ var imports = {};
  *
  * Options:
  *
+ *    all supportend options from node-sass project plus following:
+ *
  *    `src`            Source directory used to find .scss files
  *    `dest`           Destination directory used to output .css files when undefined defaults to `src`
  *    `root`           A base path for both source and destination directories
- *    `outputStyle`    Sass output style (nested or compressed), nested by default
- *    `indentedSyntax` Use standard SCSS sytax (Sassy CSS) or the cleaner SASS syntax
  *    `prefix`         It will tell the sass compiler that any request file will always be prefixed
  *                     with <prefix> and this prefix should be ignored.
- *    `sourceMap`      It will generate the sass sourcemap.
  *    `force`          Always re-compile
  *    `debug`          Output debugging information
  *    `response`       True (default) to write output directly to response instead of to a file
  *    `error`          A function to be called when something goes wrong
+ *
+ *
  *
  * Examples:
  *
@@ -83,10 +84,7 @@ module.exports = function(options) {
   // Enable debug output
   var debug = options.debug;
 
-  var indentedSyntax = options.indentedSyntax || null;
-  var sassExtension = (indentedSyntax === true) ? '.sass' : '.scss';
-
-  var sourceMap = options.sourceMap || null;
+  var sassExtension = (options.indentedSyntax === true) ? '.sass' : '.scss';
 
   // Default compile callback
   options.compile = options.compile || function() {
@@ -224,14 +222,11 @@ module.exports = function(options) {
 
           var style = options.compile();
 
-          style.render({
-            file: sassPath,
-            includePaths: [sassDir].concat(options.includePaths || []),
-            outputStyle: options.outputStyle,
-            indentedSyntax: indentedSyntax,
-            outFile: cssPath,
-            sourceMap: sourceMap,
-          }, done);
+          options.file = sassPath;
+          options.outFile = cssPath;
+          options.includePaths = [sassDir].concat(options.includePaths || []);
+
+          style.render(options, done);
         });
       };
 

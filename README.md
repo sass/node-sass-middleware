@@ -61,19 +61,18 @@ app.use(express.static(path.join(__dirname, 'public')));
  *    optional configurations:
   *    `dest`           - (String) Destination directory used to output `.css` files (when undefined defaults to `src`).
   *    `root`           - (String) A base path for both source and destination directories.
-  *    `outputStyle`    -`['nested' | 'compressed']`, `'nested'` by default. Sass output style.
-  *    `indentedSyntax` - `[true(.sass) | false(.scss)]`, false by default. Use standard SCSS sytax (Sassy CSS) or the cleaner SASS syntax.
-  *    `prefix`         - (String) It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored. 
-  *    `sourceMap`      - `[true | false]`, false by default. It will generate the sass sourcemap. 
+  *    `prefix`         - (String) It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored.
   *    `force`          - `[true | false]`, false by default. Always re-compile.
   *    `debug`          - `[true | false]`, false by default. Output debugging information.
   *    `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
   *    `error`          - A function to be called when something goes wrong.
 
+  For full list of options from original node-sass project go [here](https://github.com/sass/node-sass).
+
 ## Testing
 
     npm install mocha -g
-    
+
     mocha test
 
 ## Contributors
