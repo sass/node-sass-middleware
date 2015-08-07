@@ -223,7 +223,7 @@ module.exports = function(options) {
           var style = options.compile();
 
           options.file = sassPath;
-          options.outFile = cssPath;
+          options.outFile = options.outFile || cssPath;
           options.includePaths = [sassDir].concat(options.includePaths || []);
 
           style.render(options, done);
