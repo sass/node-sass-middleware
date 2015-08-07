@@ -86,6 +86,8 @@ module.exports = function(options) {
 
   var sassExtension = (options.indentedSyntax === true) ? '.sass' : '.scss';
 
+  var sourceMap = options.sourceMap || null;
+
   // Default compile callback
   options.compile = options.compile || function() {
     return sass;
