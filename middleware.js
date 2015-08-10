@@ -60,11 +60,12 @@ module.exports = function(options) {
   }
 
   var sassMiddlewareError = null;
+  var cachedErrorCb = options.error;
 
   // This function will be called if something goes wrong
   var error = function(err) {
-    if (options.error) {
-      options.error(err);
+    if (cachedErrorCb) {
+      cachedErrorCb(err);
     }
 
     sassMiddlewareError = err;
