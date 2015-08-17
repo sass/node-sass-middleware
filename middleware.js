@@ -5,7 +5,8 @@ var sass = require('node-sass'),
     url = require('url'),
     dirname = require('path').dirname,
     mkdirp = require('mkdirp'),
-    join = require('path').join;
+    join = require('path').join,
+    resolve = require('path').resolve;
 
 var imports = {};
 
@@ -98,6 +99,10 @@ module.exports = function(options) {
   return function sass(req, res, next) {
     if (req.method != 'GET' && req.method != 'HEAD') {
       return next();
+    }
+
+    function serve() {
+      res.sendFile(resolve(cssPath));
     }
 
     var path = url.parse(req.url).pathname;
@@ -269,7 +274,13 @@ module.exports = function(options) {
                     log('modified import %s', path);
                   });
                 }
-                changed && changed.length ? compile() : next();
+                if(changed && changed.length) {
+                  compile();
+                } else if(!options.respond) {
+                  serve();
+                } else {
+                  next();
+                }
               });
             }
           }
