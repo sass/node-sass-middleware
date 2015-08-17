@@ -5,7 +5,8 @@ var sass = require('node-sass'),
     url = require('url'),
     dirname = require('path').dirname,
     mkdirp = require('mkdirp'),
-    join = require('path').join;
+    join = require('path').join,
+    resolve = require('path').resolve;
 
 var imports = {};
 
@@ -101,11 +102,7 @@ module.exports = function(options) {
     }
 
     function serve() {
-      var path = cssPath;
-      if(path.charAt(0) !== "/") {
-        path = process.cwd() + "/" + path;
-      }
-      res.sendFile(path);
+      res.sendFile(resolve(cssPath));
     }
 
     var path = url.parse(req.url).pathname;
