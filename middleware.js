@@ -100,6 +100,14 @@ module.exports = function(options) {
       return next();
     }
 
+    function serve() {
+      var path = cssPath;
+      if(path.charAt(0) !== "/") {
+        path = process.cwd() + "/" + path;
+      }
+      res.sendFile(path);
+    }
+
     var path = url.parse(req.url).pathname;
     if (options.prefix && 0 === path.indexOf(options.prefix)) {
       path = path.substring(options.prefix.length);
@@ -269,7 +277,13 @@ module.exports = function(options) {
                     log('modified import %s', path);
                   });
                 }
-                changed && changed.length ? compile() : next();
+                if(changed && changed.length) {
+                  compile();
+                } else if(!options.respond) {
+                  serve();
+                } else {
+                  next();
+                }
               });
             }
           }
