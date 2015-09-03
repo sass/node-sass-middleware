@@ -64,6 +64,7 @@ app.use(express.static(path.join(__dirname, 'public')));
   *    `prefix`         - (String) It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored.
   *    `force`          - `[true | false]`, false by default. Always re-compile.
   *    `debug`          - `[true | false]`, false by default. Output debugging information.
+  *    `indentedSyntax` - `[true | false]`, false by default. Compiles files with the `.sass` extension instead of `.scss` in the `src` directory.
   *    `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
   *    `error`          - A function to be called when something goes wrong.
 
