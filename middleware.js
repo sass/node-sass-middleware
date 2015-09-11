@@ -159,124 +159,129 @@ module.exports = function(options) {
         var sourceMapDone = true;
 
         function doneWriting() {
-          if (cssDone && sourceMapDone) {
-            if (options.response === false) {
-              next(sassMiddlewareError);
-            } else {
-              res.writeHead(200, {
-                'Content-Type': 'text/css',
-                'Cache-Control': 'max-age=0'
-              });
-              res.end(data);
-            }
+          if (!cssDone || !sourceMapDone) {
+            return;
           }
+
+          if (options.response === false) {
+            return next(sassMiddlewareError);
+          }
+
+          res.writeHead(200, {
+            'Content-Type': 'text/css',
+            'Cache-Control': 'max-age=0'
+          });
+          res.end(data);
         }
 
         // If response is falsey, also write to file
-        if (!options.response) {
-          cssDone = false;
-          sourceMapDone = !sourceMap;
+        if (options.response) {
+          return doneWriting();
+        }
 
-          mkdirp(dirname(cssPath), '0700', function(err) {
+        cssDone = false;
+        sourceMapDone = !sourceMap;
+
+        mkdirp(dirname(cssPath), '0700', function(err) {
+          if (err) {
+            return error(err);
+          }
+
+          fs.writeFile(cssPath, data, 'utf8', function(err) {
             if (err) {
               return error(err);
             }
 
-            fs.writeFile(cssPath, data, 'utf8', function(err) {
+            cssDone = true;
+            doneWriting();
+          });
+        });
+
+        if (sourceMap) {
+          var sourceMapPath = this.options.sourceMap;
+          mkdirp(dirname(sourceMapPath), '0700', function(err) {
+            if (err) {
+              return error(err);
+            }
+
+            fs.writeFile(sourceMapPath, result.map, 'utf8', function(err) {
               if (err) {
                 return error(err);
               }
-              cssDone = true;
+              sourceMapDone = true;
               doneWriting();
             });
           });
-
-          if (sourceMap) {
-            var sourceMapPath = this.options.sourceMap;
-            mkdirp(dirname(sourceMapPath), '0700', function(err) {
-              if (err) {
-                return error(err);
-              }
-
-              fs.writeFile(sourceMapPath, result.map, 'utf8', function(err) {
-                if (err) {
-                  return error(err);
-                }
-                sourceMapDone = true;
-                doneWriting();
-              });
-            });
-          }
-        } else {
-          doneWriting();
         }
       }
+    }
 
-      // Compile to cssPath
-      var compile = function() {
-        if (debug) { log('read', cssPath); }
+    // Compile to cssPath
+    var compile = function() {
+      if (debug) { log('read', cssPath); }
 
-        fs.exists(sassPath, function(exists) {
-          if (!exists) {
-            return next();
-          }
-
-          imports[sassPath] = undefined;
-
-          var style = options.compile();
-
-          options.file = sassPath;
-          options.outFile = options.outFile || cssPath;
-          options.includePaths = [sassDir].concat(options.includePaths || []);
-
-          style.render(options, done);
-        });
-      };
-
-      // Force
-      if (force) {
-        return compile();
-      }
-
-      // Re-compile on server restart, disregarding
-      // mtimes since we need to map imports
-      if (!imports[sassPath]) {
-        return compile();
-      }
-
-      // Compare mtimes
-      fs.stat(sassPath, function(err, sassStats) {
-        if (err) {
-          error(err);
+      fs.exists(sassPath, function(exists) {
+        if (!exists) {
           return next();
         }
-        fs.stat(cssPath, function(err, cssStats) {
-          if (err) { // CSS has not been compiled, compile it!
-            if ('ENOENT' == err.code) {
-              if (debug) { log('not found', cssPath); }
-              compile();
-            } else {
-              next(err);
-            }
-          } else {
-            if (sassStats.mtime > cssStats.mtime) { // Source has changed, compile it
-              if (debug) { log('modified', cssPath); }
-              compile();
-            } else { // Already compiled, check imports
-              checkImports(sassPath, cssStats.mtime, function(changed) {
-                if (debug && changed && changed.length) {
-                  changed.forEach(function(path) {
-                    log('modified import %s', path);
-                  });
-                }
-                changed && changed.length ? compile() : next();
-              });
-            }
+
+        imports[sassPath] = undefined;
+
+        var style = options.compile();
+
+        options.file = sassPath;
+        options.outFile = options.outFile || cssPath;
+        options.includePaths = [sassDir].concat(options.includePaths || []);
+
+        style.render(options, done);
+      });
+    };
+
+    // Force
+    if (force) {
+      return compile();
+    }
+
+    // Re-compile on server restart, disregarding
+    // mtimes since we need to map imports
+    if (!imports[sassPath]) {
+      return compile();
+    }
+
+    // Compare mtimes
+    fs.stat(sassPath, function(err, sassStats) {
+      if (err) {
+        error(err);
+        return next();
+      }
+
+      fs.stat(cssPath, function(err, cssStats) {
+        if (err) { // CSS has not been compiled, compile it!
+          if ('ENOENT' === err.code) {
+            if (debug) { log('not found', cssPath); }
+            return compile();
           }
+
+          return next(err);
+        }
+
+        if (sassStats.mtime > cssStats.mtime) { // Source has changed, compile it
+          if (debug) { log('modified', cssPath); }
+          return compile();
+        }
+
+        // Already compiled, check imports
+        checkImports(sassPath, cssStats.mtime, function(changed) {
+          if (debug && changed && changed.length) {
+            changed.forEach(function(path) {
+              log('modified import %s', path);
+            });
+          }
+          changed && changed.length ? compile() : next();
         });
       });
-    }
-  };
+    });
+  }
 };
 
 /**
