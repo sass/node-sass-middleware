@@ -214,73 +214,73 @@ module.exports = function(options) {
           });
         });
       }
-    }
 
-    // Compile to cssPath
-    var compile = function() {
-      if (debug) { log('read', cssPath); }
-
-      fs.exists(sassPath, function(exists) {
-        if (!exists) {
+      // Compile to cssPath
+      var compile = function() {
+        if (debug) { log('read', cssPath); }
+  
+        fs.exists(sassPath, function(exists) {
+          if (!exists) {
+            return next();
+          }
+  
+          imports[sassPath] = undefined;
+  
+          var style = options.compile();
+  
+          options.file = sassPath;
+          options.outFile = options.outFile || cssPath;
+          options.includePaths = [sassDir].concat(options.includePaths || []);
+  
+          style.render(options, done);
+        });
+      };
+  
+      // Force
+      if (force) {
+        return compile();
+      }
+  
+      // Re-compile on server restart, disregarding
+      // mtimes since we need to map imports
+      if (!imports[sassPath]) {
+        return compile();
+      }
+  
+      // Compare mtimes
+      fs.stat(sassPath, function(err, sassStats) {
+        if (err) {
+          error(err);
           return next();
         }
-
-        imports[sassPath] = undefined;
-
-        var style = options.compile();
-
-        options.file = sassPath;
-        options.outFile = options.outFile || cssPath;
-        options.includePaths = [sassDir].concat(options.includePaths || []);
-
-        style.render(options, done);
-      });
-    };
-
-    // Force
-    if (force) {
-      return compile();
-    }
-
-    // Re-compile on server restart, disregarding
-    // mtimes since we need to map imports
-    if (!imports[sassPath]) {
-      return compile();
-    }
-
-    // Compare mtimes
-    fs.stat(sassPath, function(err, sassStats) {
-      if (err) {
-        error(err);
-        return next();
-      }
-
-      fs.stat(cssPath, function(err, cssStats) {
-        if (err) { // CSS has not been compiled, compile it!
-          if ('ENOENT' === err.code) {
-            if (debug) { log('not found', cssPath); }
+  
+        fs.stat(cssPath, function(err, cssStats) {
+          if (err) { // CSS has not been compiled, compile it!
+            if ('ENOENT' === err.code) {
+              if (debug) { log('not found', cssPath); }
+              return compile();
+            }
+  
+            return next(err);
+          }
+  
+          if (sassStats.mtime > cssStats.mtime) { // Source has changed, compile it
+            if (debug) { log('modified', cssPath); }
             return compile();
           }
-
-          return next(err);
-        }
-
-        if (sassStats.mtime > cssStats.mtime) { // Source has changed, compile it
-          if (debug) { log('modified', cssPath); }
-          return compile();
-        }
-
-        // Already compiled, check imports
-        checkImports(sassPath, cssStats.mtime, function(changed) {
-          if (debug && changed && changed.length) {
-            changed.forEach(function(path) {
-              log('modified import %s', path);
-            });
-          }
-          changed && changed.length ? compile() : next();
+  
+          // Already compiled, check imports
+          checkImports(sassPath, cssStats.mtime, function(changed) {
+            if (debug && changed && changed.length) {
+              changed.forEach(function(path) {
+                log('modified import %s', path);
+              });
+            }
+            changed && changed.length ? compile() : next();
+          });
         });
       });
-    });
+    }
   }
 };
 
