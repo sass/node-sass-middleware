@@ -106,113 +106,113 @@ module.exports = function(options) {
     }
 
     if (!/\.css$/.test(path)) {
-      next();
-    } else {
-      var cssPath = join(dest, path),
-          sassPath = join(src, path.replace(/\.css$/, sassExtension)),
-          sassDir = dirname(sassPath);
+      return next();
+    }
 
-      if (root) {
-        cssPath = join(root, dest, path.replace(new RegExp('^' + dest), ''));
-        sassPath = join(root, src, path
-            .replace(new RegExp('^' + dest), '')
-            .replace(/\.css$/, sassExtension));
+    var cssPath = join(dest, path),
+        sassPath = join(src, path.replace(/\.css$/, sassExtension)),
         sassDir = dirname(sassPath);
+
+    if (root) {
+      cssPath = join(root, dest, path.replace(new RegExp('^' + dest), ''));
+      sassPath = join(root, src, path
+          .replace(new RegExp('^' + dest), '')
+          .replace(/\.css$/, sassExtension));
+      sassDir = dirname(sassPath);
+    }
+
+    if (debug) {
+      log('source', sassPath);
+      log('dest', options.response ? '<response>' : cssPath);
+    }
+
+    // When render is done, respond to the request accordingly
+    var done = function(err, result) {
+      var data;
+
+      if (err) {
+        var file = sassPath;
+        if (err.file && err.file != 'stdin') {
+          file = err.file;
+        }
+
+        var fileLineColumn = file + ':' + err.line + ':' + err.column;
+        data = err.message.replace(/^ +/, '') + '\n\nin ' + fileLineColumn;
+        if (debug) logError(data);
+
+        error(err);
+
+        return next(err);
       }
+
+      data = result.css;
 
       if (debug) {
-        log('source', sassPath);
-        log('dest', options.response ? '<response>' : cssPath);
+        log('render', options.response ? '<response>' : sassPath);
+
+        if (sourceMap) {
+          log('render', this.options.sourceMap);
+        }
+      }
+      imports[sassPath] = result.stats.includedFiles;
+
+      var cssDone = true;
+      var sourceMapDone = true;
+
+      function doneWriting() {
+        if (!cssDone || !sourceMapDone) {
+          return;
+        }
+
+        if (options.response === false) {
+          return next(sassMiddlewareError);
+        }
+
+        res.writeHead(200, {
+          'Content-Type': 'text/css',
+          'Cache-Control': 'max-age=0'
+        });
+        res.end(data);
       }
 
-      // When render is done, respond to the request accordingly
-      var done = function(err, result) {
-        var data;
+      // If response is falsey, also write to file
+      if (options.response) {
+        return doneWriting();
+      }
 
+      cssDone = false;
+      sourceMapDone = !sourceMap;
+
+      mkdirp(dirname(cssPath), '0700', function(err) {
         if (err) {
-          var file = sassPath;
-          if (err.file && err.file != 'stdin') {
-            file = err.file;
-          }
-
-          var fileLineColumn = file + ':' + err.line + ':' + err.column;
-          data = err.message.replace(/^ +/, '') + '\n\nin ' + fileLineColumn;
-          if (debug) logError(data);
-
-          error(err);
-
-          return next(err);
+          return error(err);
         }
 
-        data = result.css;
-
-        if (debug) {
-          log('render', options.response ? '<response>' : sassPath);
-
-          if (sourceMap) {
-            log('render', this.options.sourceMap);
-          }
-        }
-        imports[sassPath] = result.stats.includedFiles;
-
-        var cssDone = true;
-        var sourceMapDone = true;
-
-        function doneWriting() {
-          if (!cssDone || !sourceMapDone) {
-            return;
-          }
-
-          if (options.response === false) {
-            return next(sassMiddlewareError);
-          }
-
-          res.writeHead(200, {
-            'Content-Type': 'text/css',
-            'Cache-Control': 'max-age=0'
-          });
-          res.end(data);
-        }
-
-        // If response is falsey, also write to file
-        if (options.response) {
-          return doneWriting();
-        }
-
-        cssDone = false;
-        sourceMapDone = !sourceMap;
-
-        mkdirp(dirname(cssPath), '0700', function(err) {
+        fs.writeFile(cssPath, data, 'utf8', function(err) {
           if (err) {
             return error(err);
           }
 
-          fs.writeFile(cssPath, data, 'utf8', function(err) {
+          cssDone = true;
+          doneWriting();
+        });
+      });
+
+      if (sourceMap) {
+        var sourceMapPath = this.options.sourceMap;
+        mkdirp(dirname(sourceMapPath), '0700', function(err) {
+          if (err) {
+            return error(err);
+          }
+
+          fs.writeFile(sourceMapPath, result.map, 'utf8', function(err) {
             if (err) {
               return error(err);
             }
-
-            cssDone = true;
+            sourceMapDone = true;
             doneWriting();
           });
         });
-
-        if (sourceMap) {
-          var sourceMapPath = this.options.sourceMap;
-          mkdirp(dirname(sourceMapPath), '0700', function(err) {
-            if (err) {
-              return error(err);
-            }
-
-            fs.writeFile(sourceMapPath, result.map, 'utf8', function(err) {
-              if (err) {
-                return error(err);
-              }
-              sourceMapDone = true;
-              doneWriting();
-            });
-          });
-        }
       }
     }
 
