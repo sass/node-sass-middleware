@@ -1,6 +1,7 @@
 "use strict";
 
 var sass = require('node-sass'),
+    util = require('util'),
     fs = require('fs'),
     url = require('url'),
     dirname = require('path').dirname,
@@ -229,11 +230,13 @@ module.exports = function(options) {
 
         var style = options.compile();
 
-        options.file = sassPath;
-        options.outFile = options.outFile || cssPath;
-        options.includePaths = [sassDir].concat(options.includePaths || []);
+        var renderOptions = util._extend({}, options);
 
-        style.render(options, done);
+        renderOptions.file = sassPath;
+        renderOptions.outFile = options.outFile || cssPath;
+        renderOptions.includePaths = [sassDir].concat(options.includePaths || []);
+
+        style.render(renderOptions, done);
       });
     };
 
