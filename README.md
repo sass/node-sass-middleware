@@ -100,6 +100,7 @@ http.createServer(app).listen(3000);
   *    `debug`          - `[true | false]`, false by default. Output debugging information.
   *    `indentedSyntax` - `[true | false]`, false by default. Compiles files with the `.sass` extension instead of `.scss` in the `src` directory.
   *    `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
+  *    `prerender`      - A function to be called with `renderOptions` and a `next` callback immediately before `sass.render(...)` is called.
   *    `error`          - A function to be called when something goes wrong.
 
   For full list of options from original node-sass project go [here](https://github.com/sass/node-sass).

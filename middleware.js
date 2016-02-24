@@ -25,6 +25,8 @@ var imports = {};
  *    `force`          Always re-compile
  *    `debug`          Output debugging information
  *    `response`       True (default) to write output directly to response instead of to a file
+ *    `prerender`      A function to be called with renderOptions and a next callback immediately before
+ *                     sass.render(...) is called.
  *    `error`          A function to be called when something goes wrong
  *
  *
@@ -89,6 +91,11 @@ module.exports = function(options) {
   var sassExtension = (options.indentedSyntax === true) ? '.sass' : '.scss';
 
   var sourceMap = options.sourceMap || null;
+
+  // Default prerender callback
+  options.prerender = options.prerender || function( renderOptions , next ){
+    next();
+  };
 
   // Default compile callback
   options.compile = options.compile || function() {
@@ -236,7 +243,9 @@ module.exports = function(options) {
         renderOptions.outFile = options.outFile || cssPath;
         renderOptions.includePaths = [sassDir].concat(options.includePaths || []);
 
-        style.render(renderOptions, done);
+        options.prerender( renderOptions , function(){
+          style.render(renderOptions, done);
+        });
       });
     };
 
