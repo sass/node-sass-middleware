@@ -173,7 +173,7 @@ module.exports = function(options) {
 
         res.writeHead(200, {
           'Content-Type': 'text/css',
-          'Cache-Control': 'max-age=' + options.maxAge;
+          'Cache-Control': 'max-age=' + options.maxAge
         });
         res.end(data);
       }
