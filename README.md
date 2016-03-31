@@ -101,6 +101,8 @@ http.createServer(app).listen(3000);
   *    `indentedSyntax` - `[true | false]`, false by default. Compiles files with the `.sass` extension instead of `.scss` in the `src` directory.
   *    `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
   *    `error`          - A function to be called when something goes wrong.
+  *    `maxAge`         - MaxAge to be passed in Cache-Control header.
+
 
   For full list of options from original node-sass project go [here](https://github.com/sass/node-sass).
 
