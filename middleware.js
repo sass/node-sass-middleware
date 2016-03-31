@@ -26,7 +26,7 @@ var imports = {};
  *    `debug`          Output debugging information
  *    `response`       True (default) to write output directly to response instead of to a file
  *    `error`          A function to be called when something goes wrong
- *
+ *    `maxAge`         MaxAge to be passed in Cache-Control header
  *
  *
  * Examples:
@@ -89,6 +89,8 @@ module.exports = function(options) {
   var sassExtension = (options.indentedSyntax === true) ? '.sass' : '.scss';
 
   var sourceMap = options.sourceMap || null;
+
+  var maxAge = options.maxAge || 0;
 
   // Default compile callback
   options.compile = options.compile || function() {
@@ -171,7 +173,7 @@ module.exports = function(options) {
 
         res.writeHead(200, {
           'Content-Type': 'text/css',
-          'Cache-Control': 'max-age=0'
+          'Cache-Control': 'max-age=' + maxAge
         });
         res.end(data);
       }
