@@ -516,3 +516,35 @@ describe('Using middleware to compile .sass', function () {
   });
 
 });
+
+describe('Checking for http headers', function() {
+    var oneDay = 60 * 60 * 24; // one day
+    var server = connect()
+      .use(middleware({
+          src: __dirname,
+          dest: __dirname,
+          maxAge: oneDay
+      }))
+      .use(function(err, req, res, next) {
+          res.statusCode = 500;
+          res.end(err.message);
+      });
+
+
+    it('custom max-age is set', function (done) {
+        request(server)
+        .get('/test.css')
+        .set('Accept', 'text/css')
+        .expect('Cache-Control', 'max-age='+oneDay)
+        .expect(200, function() {
+            // delete file
+            fs.exists(test_cssFile, function (exists) {
+                if (exists) {
+                    fs.unlink(test_cssFile);
+                }
+            });
+            done();
+        });
+    });
+
+});
