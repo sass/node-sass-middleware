@@ -53,6 +53,8 @@ app.use(sassMiddleware({
     outputStyle: 'compressed',
     prefix:  '/prefix'  // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>
 }));
+// Note: you must place sass-middleware *before* `express.static` or else it will
+// not work.
 app.use(express.static(path.join(__dirname, 'public')));
 ```
 
