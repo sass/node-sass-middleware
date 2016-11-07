@@ -123,7 +123,7 @@ app.use(sassMiddleware({
     dest: path.join(__dirname, 'public'),
     debug: true,
     outputStyle: 'compressed',
-    prefix:  '/prefix'  // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>,
+    prefix:  '/prefix',  // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>
     log : function (key, value) { winston.info('node-saas-middleware   %s : %s', key, value); }
 }));
 // Note: you must place sass-middleware *before* `express.static` or else it will
