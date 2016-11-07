@@ -92,6 +92,11 @@ module.exports = function(options) {
 
   var maxAge = options.maxAge || 0;
 
+  //Allow custom log function or default one
+  var log = options.log || function (key, val) {
+    console.error('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
+  };
+    
   // Default compile callback
   options.compile = options.compile || function() {
     return sass;
@@ -321,16 +326,6 @@ function checkImports(path, time, fn) {
 
 /**
  * Log a message.
- *
- * @api private
- */
-
-function log(key, val) {
-  console.error('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
-}
-
-/**
- * Log an error message.
  *
  * @api private
  */

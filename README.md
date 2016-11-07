@@ -104,9 +104,32 @@ http.createServer(app).listen(3000);
   *    `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
   *    `error`          - A function to be called when something goes wrong.
   *    `maxAge`         - MaxAge to be passed in Cache-Control header.
+  *    `log`            - A function used to log data instead of the default one.
 
 
   For full list of options from original node-sass project go [here](https://github.com/sass/node-sass).
+  
+### Express example with custom log function
+
+```javascript
+var express = require('express');
+var sassMiddleware = require('node-sass-middleware');
+var path = require('path');
+var winston = require('winston');
+var app = express();
+app.use(sassMiddleware({
+    /* Options */
+    src: __dirname,
+    dest: path.join(__dirname, 'public'),
+    debug: true,
+    outputStyle: 'compressed',
+    prefix:  '/prefix'  // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>,
+    log : function (key, value) { winston.info('node-saas-middleware   %s : %s', key, value); }
+}));
+// Note: you must place sass-middleware *before* `express.static` or else it will
+// not work.
+app.use(express.static(path.join(__dirname, 'public')));
+```
 
 ## Testing
 
