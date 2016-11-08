@@ -92,7 +92,6 @@ module.exports = function(options) {
   var sourceMap = options.sourceMap || null;
 
   var maxAge = options.maxAge || 0;
-
     
   //Allow custom log function or default one
   var log = options.log || function (severity, key, val) {
