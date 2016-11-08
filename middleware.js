@@ -27,6 +27,7 @@ var imports = {};
  *    `response`       True (default) to write output directly to response instead of to a file
  *    `error`          A function to be called when something goes wrong
  *    `maxAge`         MaxAge to be passed in Cache-Control header
+ *    `log`            function(severity, key, val), used to log data instead of the default `console.error`
  *
  *
  * Examples:
@@ -91,7 +92,16 @@ module.exports = function(options) {
   var sourceMap = options.sourceMap || null;
 
   var maxAge = options.maxAge || 0;
-
+    
+  //Allow custom log function or default one
+  var log = options.log || function (severity, key, val) {
+    if (typeof(console[severity]) === 'function') {
+        console[severity]('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
+    } else {
+        console.error('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
+    }
+  };
+    
   // Default compile callback
   options.compile = options.compile || function() {
     return sass;
@@ -125,8 +135,8 @@ module.exports = function(options) {
     }
 
     if (debug) {
-      log('source', sassPath);
-      log('dest', options.response ? '<response>' : cssPath);
+      log('debug', 'source', sassPath);
+      log('debug', 'dest', options.response ? '<response>' : cssPath);
     }
 
     // When render is done, respond to the request accordingly
@@ -141,7 +151,7 @@ module.exports = function(options) {
 
         var fileLineColumn = file + ':' + err.line + ':' + err.column;
         data = err.message.replace(/^ +/, '') + '\n\nin ' + fileLineColumn;
-        if (debug) logError(data);
+        if (debug) log('error','error', '\x07\x1B[31m' + data + '\x1B[91m');
 
         error(err);
 
@@ -151,10 +161,10 @@ module.exports = function(options) {
       data = result.css;
 
       if (debug) {
-        log('render', options.response ? '<response>' : sassPath);
+        log('debug', 'render', options.response ? '<response>' : sassPath);
 
         if (sourceMap) {
-          log('render', this.options.sourceMap);
+          log('debug', 'render', this.options.sourceMap);
         }
       }
       imports[sassPath] = result.stats.includedFiles;
@@ -221,7 +231,7 @@ module.exports = function(options) {
 
     // Compile to cssPath
     var compile = function() {
-      if (debug) { log('read', cssPath); }
+      if (debug) { log('debug', 'read', cssPath); }
 
       fs.exists(sassPath, function(exists) {
         if (!exists) {
@@ -263,7 +273,7 @@ module.exports = function(options) {
       fs.stat(cssPath, function(err, cssStats) {
         if (err) { // CSS has not been compiled, compile it!
           if ('ENOENT' === err.code) {
-            if (debug) { log('not found', cssPath); }
+            if (debug) { log('error', 'not found', cssPath); }
             return compile();
           }
 
@@ -271,7 +281,7 @@ module.exports = function(options) {
         }
 
         if (sassStats.mtime > cssStats.mtime) { // Source has changed, compile it
-          if (debug) { log('modified', cssPath); }
+          if (debug) { log('debug', 'modified', cssPath); }
           return compile();
         }
 
@@ -279,7 +289,7 @@ module.exports = function(options) {
         checkImports(sassPath, cssStats.mtime, function(changed) {
           if (debug && changed && changed.length) {
             changed.forEach(function(path) {
-              log('modified import %s', path);
+              log('debug', 'modified import %s', path);
             });
           }
           changed && changed.length ? compile() : next();
@@ -317,24 +327,4 @@ function checkImports(path, time, fn) {
       --pending || fn(changed);
     });
   });
-}
-
-/**
- * Log a message.
- *
- * @api private
- */
-
-function log(key, val) {
-  console.error('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
-}
-
-/**
- * Log an error message.
- *
- * @api private
- */
-
-function logError(message) {
-  log('error', '\x07\x1B[31m' + message + '\x1B[91m');
 }
