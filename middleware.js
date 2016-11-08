@@ -290,7 +290,7 @@ module.exports = function(options) {
         checkImports(sassPath, cssStats.mtime, function(changed) {
           if (debug && changed && changed.length) {
             changed.forEach(function(path) {
-              log('info', 'modified import %s', path);
+              log('debug', 'modified import %s', path);
             });
           }
           changed && changed.length ? compile() : next();
