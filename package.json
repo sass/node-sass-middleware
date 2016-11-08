@@ -4,7 +4,7 @@
   "description": "Connect middleware for node-sass",
   "version": "0.9.8",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha"
+    "test": "./node_modules/.bin/mocha"
   },
   "homepage": "https://github.com/sass/node-sass-middleware",
   "keywords": [
