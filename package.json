@@ -2,7 +2,7 @@
   "author": "Andrew Nesbitt <andrewnez@gmail.com> (http://andrew.github.com)",
   "name": "node-sass-middleware",
   "description": "Connect middleware for node-sass",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "scripts": {
     "test": "./node_modules/.bin/mocha"
   },
