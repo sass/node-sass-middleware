@@ -6,55 +6,46 @@ var fs = require('fs'),
     request = require('supertest'),
     connect = require('connect'),
     middleware = require('../middleware'),
-    test_cssFile = path.join(__dirname, '/test.css'),
-    test_sassFile = path.join(__dirname, '/test.sass'),
-    test_scssFile = path.join(__dirname, '/test.scss'),
-    index_cssFile = path.join(__dirname, '/index.css'),
-    index_sassFile = path.join(__dirname, '/index.sass'),
-    index_scssFile = path.join(__dirname, '/index.scss'),
-    index_sourceMap = path.join(__dirname, '/index.css.map');
+    fixture = path.join.bind(null, __dirname, 'fixtures'),
+    test_cssFile = fixture('test.css'),
+    test_sassFile = fixture('test.sass'),
+    test_scssFile = fixture('test.scss'),
+    index_cssFile = fixture('index.css'),
+    index_sassFile = fixture('index.sass'),
+    index_scssFile = fixture('index.scss'),
+    index_sourceMap = fixture('index.css.map');
 
-describe('Creating middleware', function () {
+describe('Creating middleware', function() {
 
-  it('throws an error when omitting src', function () {
+  it('throws an error when omitting src', function() {
     middleware.should.throw(/requires "src"/);
   });
 
-  it('returns function when invoked with src option', function () {
+  it('returns function when invoked with src option', function() {
     middleware({ src: __dirname }).should.be.type('function');
   });
 
-  it('can be given a string as the src option', function () {
+  it('can be given a string as the src option', function() {
     middleware(__dirname).should.be.type('function');
   });
 
 });
 
-describe('Using middleware to compile .scss', function () {
-  var server = connect()
-    .use(middleware({
-      src: __dirname,
-      dest: __dirname
-    }))
-    .use(function(err, req, res, next) {
-      res.statusCode = 500;
-      res.end(err.message);
-    });
-
-  beforeEach(function (done) {
-    fs.exists(test_cssFile, function (exists) {
+function setupBeforeEach() {
+  beforeEach(function(done) {
+    fs.exists(test_cssFile, function(exists) {
       if (exists) {
         fs.unlink(test_cssFile);
       }
     });
 
-    fs.exists(index_cssFile, function (exists) {
+    fs.exists(index_cssFile, function(exists) {
       if (exists) {
         fs.unlink(index_cssFile);
       }
     });
 
-    fs.exists(index_sourceMap, function (exists) {
+    fs.exists(index_sourceMap, function(exists) {
       if (exists) {
         fs.unlink(index_sourceMap);
       }
@@ -62,10 +53,24 @@ describe('Using middleware to compile .scss', function () {
 
     done();
   });
+}
 
-  describe('successful file request', function () {
+describe('Using middleware to compile .scss', function() {
+  var server = connect()
+    .use(middleware({
+      src: fixture(),
+      dest: fixture()
+    }))
+    .use(function(err, req, res, next) {
+      res.statusCode = 500;
+      res.end(err.message);
+    });
 
-    it('serves a file with 200 Content-Type css', function (done) {
+  setupBeforeEach();
+
+  describe('successful file request', function() {
+
+    it('serves a file with 200 Content-Type css', function(done) {
       request(server)
         .get('/test.css')
         .set('Accept', 'text/css')
@@ -73,7 +78,7 @@ describe('Using middleware to compile .scss', function () {
         .expect(200, done);
     });
 
-    it('serves the compiled contents of the relative scss file', function (done) {
+    it('serves the compiled contents of the relative scss file', function(done) {
       var filesrc = fs.readFileSync(test_scssFile),
           result = sass.renderSync({ data: filesrc.toString() });
       request(server)
@@ -82,13 +87,13 @@ describe('Using middleware to compile .scss', function () {
         .expect(200, done);
     });
 
-    it('writes the compiled contents out to the expected file', function (done) {
+    it('writes the compiled contents out to the expected file', function(done) {
       var filesrc = fs.readFileSync(test_scssFile),
           result = sass.renderSync({ data: filesrc.toString() });
       request(server)
         .get('/test.css')
         .expect(result.css.toString())
-        .expect(200, function (err) {
+        .expect(200, function(err) {
           if (err) {
             done(err);
           } else {
@@ -109,8 +114,8 @@ describe('Using middleware to compile .scss', function () {
           server = connect()
           .use(middleware({
             response: false,
-            src: __dirname,
-            dest: __dirname
+            src: fixture(),
+            dest: fixture()
           }));
 
       server.use(function(req, res) {
@@ -120,7 +125,7 @@ describe('Using middleware to compile .scss', function () {
       request(server)
         .get('/test.css')
         .expect(anotherResponse)
-        .expect(200, function (err) {
+        .expect(200, function(err) {
           if (err) {
             done(err);
           } else {
@@ -132,9 +137,9 @@ describe('Using middleware to compile .scss', function () {
 
   });
 
-  describe('unsucessful file request', function () {
+  describe('unsucessful file request', function() {
 
-    it('moves to next middleware', function (done) {
+    it('moves to next middleware', function(done) {
       request(server)
         .get('/does-not-exist.css')
         .expect('Cannot GET /does-not-exist.css\n')
@@ -145,7 +150,7 @@ describe('Using middleware to compile .scss', function () {
 
   describe('compiling files with dependencies (source file contains includes)', function() {
 
-    it ('serves the compiled contents of the relative scss file', function (done) {
+    it('serves the compiled contents of the relative scss file', function(done) {
       var filesrc = fs.readFileSync(index_scssFile),
           result = sass.renderSync({ data: filesrc.toString() });
       request(server)
@@ -154,14 +159,14 @@ describe('Using middleware to compile .scss', function () {
         .expect(200, done);
     });
 
-    it('writes the compiled contents out to the expected file', function (done) {
+    it('writes the compiled contents out to the expected file', function(done) {
       var filesrc = fs.readFileSync(index_scssFile),
           result = sass.renderSync({ data: filesrc.toString() });
 
       request(server)
         .get('/index.css')
         .expect(result.css.toString())
-        .expect(200, function (err) {
+        .expect(200, function(err) {
           if (err) {
             done(err);
           } else {
@@ -223,8 +228,8 @@ describe('Using middleware to compile .scss', function () {
   describe('generating source-map for compiled css', function() {
     var server = connect()
       .use(middleware({
-        src: __dirname,
-        dest: __dirname,
+        src: fixture(),
+        dest: fixture(),
         sourceMap: true
       }))
       .use(function(err, req, res, next) {
@@ -287,11 +292,11 @@ describe('Using middleware to compile .scss', function () {
 
 });
 
-describe('Using middleware to compile .sass', function () {
+describe('Using middleware to compile .sass', function() {
   var server = connect()
     .use(middleware({
-      src: __dirname,
-      dest: __dirname,
+      src: fixture(),
+      dest: fixture(),
       indentedSyntax: true
     }))
     .use(function(err, req, res, next) {
@@ -299,31 +304,11 @@ describe('Using middleware to compile .sass', function () {
       res.end(err.message);
     });
 
-  beforeEach(function (done) {
-    fs.exists(test_cssFile, function (exists) {
-      if (exists) {
-        fs.unlink(test_cssFile);
-      }
-    });
+  setupBeforeEach();
 
-    fs.exists(index_cssFile, function (exists) {
-      if (exists) {
-        fs.unlink(index_cssFile);
-      }
-    });
+  describe('successful file request', function() {
 
-    fs.exists(index_sourceMap, function (exists) {
-      if (exists) {
-        fs.unlink(index_sourceMap);
-      }
-    });
-
-    done();
-  });
-
-  describe('successful file request', function () {
-
-    it('serves a file with 200 Content-Type css', function (done) {
+    it('serves a file with 200 Content-Type css', function(done) {
       request(server)
         .get('/test.css')
         .set('Accept', 'text/css')
@@ -331,7 +316,7 @@ describe('Using middleware to compile .sass', function () {
         .expect(200, done);
     });
 
-    it('serves the compiled contents of the relative sass file', function (done) {
+    it('serves the compiled contents of the relative sass file', function(done) {
       var filesrc = fs.readFileSync(test_sassFile),
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
       request(server)
@@ -340,13 +325,13 @@ describe('Using middleware to compile .sass', function () {
         .expect(200, done);
     });
 
-    it('writes the compiled contents out to the expected file', function (done) {
+    it('writes the compiled contents out to the expected file', function(done) {
       var filesrc = fs.readFileSync(test_sassFile),
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
       request(server)
         .get('/test.css')
         .expect(result.css.toString())
-        .expect(200, function (err) {
+        .expect(200, function(err) {
           if (err) {
             done(err);
           } else {
@@ -364,9 +349,9 @@ describe('Using middleware to compile .sass', function () {
 
   });
 
-  describe('unsucessful file request', function () {
+  describe('unsucessful file request', function() {
 
-    it('moves to next middleware', function (done) {
+    it('moves to next middleware', function(done) {
       request(server)
         .get('/does-not-exist.css')
         .expect('Cannot GET /does-not-exist.css\n')
@@ -377,7 +362,7 @@ describe('Using middleware to compile .sass', function () {
 
   describe('compiling files with dependencies (source file contains includes)', function() {
 
-    it ('serves the compiled contents of the relative sass file', function (done) {
+    it('serves the compiled contents of the relative sass file', function(done) {
       var filesrc = fs.readFileSync(index_sassFile),
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
       request(server)
@@ -386,14 +371,14 @@ describe('Using middleware to compile .sass', function () {
         .expect(200, done);
     });
 
-    it('writes the compiled contents out to the expected file', function (done) {
+    it('writes the compiled contents out to the expected file', function(done) {
       var filesrc = fs.readFileSync(index_sassFile),
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
 
       request(server)
         .get('/index.css')
         .expect(result.css.toString())
-        .expect(200, function (err) {
+        .expect(200, function(err) {
           if (err) {
             done(err);
           } else {
@@ -454,8 +439,8 @@ describe('Using middleware to compile .sass', function () {
   describe('generating source-map for compiled css', function() {
     var server = connect()
       .use(middleware({
-        src: __dirname,
-        dest: __dirname,
+        src: fixture(),
+        dest: fixture(),
         indentedSyntax: true,
         sourceMap: true
       }))
@@ -518,33 +503,32 @@ describe('Using middleware to compile .sass', function () {
 });
 
 describe('Checking for http headers', function() {
-    var oneDay = 60 * 60 * 24; // one day
-    var server = connect()
-      .use(middleware({
-          src: __dirname,
-          dest: __dirname,
-          maxAge: oneDay
-      }))
-      .use(function(err, req, res, next) {
-          res.statusCode = 500;
-          res.end(err.message);
-      });
-
-
-    it('custom max-age is set', function (done) {
-        request(server)
-        .get('/test.css')
-        .set('Accept', 'text/css')
-        .expect('Cache-Control', 'max-age='+oneDay)
-        .expect(200, function() {
-            // delete file
-            fs.exists(test_cssFile, function (exists) {
-                if (exists) {
-                    fs.unlink(test_cssFile);
-                }
-            });
-            done();
-        });
+  var oneDay = 60 * 60 * 24; // one day
+  var server = connect()
+    .use(middleware({
+      src: fixture(),
+      dest: fixture(),
+      maxAge: oneDay
+    }))
+    .use(function(err, req, res, next) {
+      res.statusCode = 500;
+      res.end(err.message);
     });
+
+  it('custom max-age is set', function(done) {
+    request(server)
+    .get('/test.css')
+    .set('Accept', 'text/css')
+    .expect('Cache-Control', 'max-age=' + oneDay)
+    .expect(200, function() {
+      // delete file
+      fs.exists(test_cssFile, function(exists) {
+        if (exists) {
+          fs.unlink(test_cssFile);
+        }
+      });
+      done();
+    });
+  });
 
 });
