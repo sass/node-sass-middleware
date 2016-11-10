@@ -13,7 +13,9 @@ var fs = require('fs'),
     index_cssFile = fixture('index.css'),
     index_sassFile = fixture('index.sass'),
     index_scssFile = fixture('index.scss'),
-    index_sourceMap = fixture('index.css.map');
+    index_sourceMap = fixture('index.css.map'),
+    spawn = require('child_process').spawn,
+    http = require('http');
 
 describe('Creating middleware', function() {
 
@@ -29,6 +31,45 @@ describe('Creating middleware', function() {
     middleware(__dirname).should.be.type('function');
   });
 
+});
+
+describe('Log messages', function() {
+  it('should use the default logger when none provided', function(done) {
+    var expected = '\u001b[90msource:\u001b[0m \u001b[36m' + index_scssFile + '\u001b[0m';
+    var bin = spawn('node', [fixture('example-server.js')]);
+
+    setTimeout(function() {
+      http.request({ method: 'GET', host: 'localhost', port: '8000', path: '/index.css' })
+          .end();
+    }, 500);
+
+    bin.stderr.once('data', function(data) {
+      data.toString().trim().should.equal(expected);
+      done();
+    });
+  });
+
+  it('should use the provided custom logger', function(done) {
+    var token = null;
+
+    var server = connect()
+      .use(middleware({
+        src: fixture(),
+        dest: fixture(),
+        debug: true,
+        log: function(severity) {
+          token = severity;
+        }
+      }));
+
+    request(server)
+      .get('/index.css')
+      .expect(200, function() {
+        fs.unlink(index_cssFile);
+        token.should.equal('debug');
+        done();
+      });
+  });
 });
 
 function setupBeforeEach() {
