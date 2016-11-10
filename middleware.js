@@ -92,16 +92,16 @@ module.exports = function(options) {
   var sourceMap = options.sourceMap || null;
 
   var maxAge = options.maxAge || 0;
-    
+
   //Allow custom log function or default one
-  var log = options.log || function (severity, key, val) {
-    if (typeof(console[severity]) === 'function') {
-        console[severity]('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
+  var log = options.log || function(severity, key, val) {
+    if (typeof (console[severity]) === 'function') {
+      console[severity]('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
     } else {
-        console.error('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
+      console.error('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
     }
   };
-    
+
   // Default compile callback
   options.compile = options.compile || function() {
     return sass;
@@ -151,7 +151,7 @@ module.exports = function(options) {
 
         var fileLineColumn = file + ':' + err.line + ':' + err.column;
         data = err.message.replace(/^ +/, '') + '\n\nin ' + fileLineColumn;
-        if (debug) log('error','error', '\x07\x1B[31m' + data + '\x1B[91m');
+        if (debug) log('error', 'error', '\x07\x1B[31m' + data + '\x1B[91m');
 
         error(err);
 
