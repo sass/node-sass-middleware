@@ -55,7 +55,7 @@ app.use(sassMiddleware({
 }));
 // Note: you must place sass-middleware *before* `express.static` or else it will
 // not work.
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 ```
 
 ### Connect with other middleware example
