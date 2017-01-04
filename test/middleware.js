@@ -35,16 +35,21 @@ describe('Creating middleware', function() {
 
 describe('Log messages', function() {
   it('should use the default logger when none provided', function(done) {
-    var expected = '\u001b[90msource:\u001b[0m \u001b[36m' + index_scssFile + '\u001b[0m';
+    var serverStartupTimeout = 950;
+    var expected = '  \u001b[90msource:\u001b[0m \u001b[36m' + index_scssFile + '\u001b[0m';
     var bin = spawn('node', [fixture('example-server.js')]);
+
+    // exclude serverStartupTimeout from timeout and slow counters of test runs
+    this.timeout(this.timeout() + serverStartupTimeout);
+    this.slow(this.slow() + serverStartupTimeout);
 
     setTimeout(function() {
       http.request({ method: 'GET', host: 'localhost', port: '8000', path: '/index.css' })
           .end();
-    }, 500);
+    }, serverStartupTimeout);
 
     bin.stderr.once('data', function(data) {
-      data.toString().trim().should.equal(expected);
+      data.toString().should.startWith(expected);
       done();
     });
   });
