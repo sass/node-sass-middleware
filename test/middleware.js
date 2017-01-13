@@ -33,22 +33,34 @@ describe('Creating middleware', function() {
 
 });
 
-describe('Log messages', function() {
-  it('should use the default logger when none provided', function(done) {
+
+var spawnedServer;
+
+describe('Spawning example server', function() {
+  it('starts the server', function(done) {
     var serverStartupTimeout = 950;
-    var expected = '  \u001b[90msource:\u001b[0m \u001b[36m' + index_scssFile + '\u001b[0m';
-    var bin = spawn('node', [fixture('example-server.js')]);
+    spawnedServer = spawn('node', [fixture('example-server.js')]);
 
     // exclude serverStartupTimeout from timeout and slow counters of test runs
     this.timeout(this.timeout() + serverStartupTimeout);
     this.slow(this.slow() + serverStartupTimeout);
 
     setTimeout(function() {
-      http.request({ method: 'GET', host: 'localhost', port: '8000', path: '/index.css' })
-          .end();
+      (spawnedServer.killed).should.be.false();
+      (spawnedServer.exitCode === null).should.be.true();
+      done();
     }, serverStartupTimeout);
+  });
+});
 
-    bin.stderr.once('data', function(data) {
+describe('Log messages', function() {
+  it('should use the default logger when none provided', function(done) {
+    var expected = '  \u001b[90msource:\u001b[0m \u001b[36m' + index_scssFile + '\u001b[0m';
+
+    http.request({ method: 'GET', host: 'localhost', port: process.env.PORT || '8000', path: '/index.css' })
+        .end();
+
+    spawnedServer.stderr.once('data', function(data) {
       data.toString().should.startWith(expected);
       done();
     });
@@ -577,4 +589,21 @@ describe('Checking for http headers', function() {
     });
   });
 
+});
+
+describe('Killing example server', function() {
+  it('stops the server', function(done) {
+    spawnedServer.kill();
+    var serverShutdownTimeout = 500;
+
+    // exclude serverStartupTimeout from timeout and slow counters of test runs
+    this.timeout(this.timeout() + serverShutdownTimeout);
+    this.slow(this.slow() + serverShutdownTimeout);
+
+    setTimeout(function() {
+      (spawnedServer.killed).should.be.true();
+      (spawnedServer.exitCode === null).should.be.true();
+      done();
+    }, serverShutdownTimeout);
+  });
 });
