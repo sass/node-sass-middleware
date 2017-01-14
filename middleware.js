@@ -61,18 +61,6 @@ module.exports = function(options) {
     options = { src: options };
   }
 
-  var sassMiddlewareError = null;
-  var cachedErrorCb = options.error;
-
-  // This function will be called if something goes wrong
-  var error = function(err) {
-    if (cachedErrorCb) {
-      cachedErrorCb(err);
-    }
-
-    sassMiddlewareError = err;
-  };
-
   // Source directory (required)
   var src = options.src || function() {
     throw new Error('sass.middleware() requires "src" directory.');
@@ -109,6 +97,21 @@ module.exports = function(options) {
 
   // Middleware
   return function sass(req, res, next) {
+    var sassMiddlewareError = null;
+
+    // This function will be called if something goes wrong
+    var error = function(err, errorMessage) {
+      if (debug) {
+        log('error', 'error', errorMessage || err);
+      }
+
+      if (options.error) {
+        options.error(err);
+      }
+
+      sassMiddlewareError = err;
+    };
+
     if (req.method != 'GET' && req.method != 'HEAD') {
       return next();
     }
@@ -141,8 +144,6 @@ module.exports = function(options) {
 
     // When render is done, respond to the request accordingly
     var done = function(err, result) {
-      var data;
-
       if (err) {
         var file = sassPath;
         if (err.file && err.file != 'stdin') {
@@ -150,15 +151,13 @@ module.exports = function(options) {
         }
 
         var fileLineColumn = file + ':' + err.line + ':' + err.column;
-        data = err.message.replace(/^ +/, '') + '\n\nin ' + fileLineColumn;
-        if (debug) log('error', 'error', '\x07\x1B[31m' + data + '\x1B[91m');
+        var errorMessage = '\x07\x1B[31m' + err.message.replace(/^ +/, '') + '\n\nin ' + fileLineColumn + '\x1B[91m';
 
-        error(err);
-
+        error(err, errorMessage);
         return next(err);
       }
 
-      data = result.css;
+      var data = result.css;
 
       if (debug) {
         log('debug', 'render', options.response ? '<response>' : sassPath);
@@ -188,7 +187,7 @@ module.exports = function(options) {
         res.end(data);
       }
 
-      // If response is falsey, also write to file
+      // If response is true, do not write to file
       if (options.response) {
         return doneWriting();
       }
@@ -198,12 +197,14 @@ module.exports = function(options) {
 
       mkdirp(dirname(cssPath), '0700', function(err) {
         if (err) {
-          return error(err);
+          error(err);
+          cssDone = true;
+          return doneWriting();
         }
 
         fs.writeFile(cssPath, data, 'utf8', function(err) {
           if (err) {
-            return error(err);
+            error(err);
           }
 
           cssDone = true;
@@ -215,13 +216,16 @@ module.exports = function(options) {
         var sourceMapPath = this.options.sourceMap;
         mkdirp(dirname(sourceMapPath), '0700', function(err) {
           if (err) {
-            return error(err);
+            error(err);
+            sourceMapDone = true;
+            return doneWriting();
           }
 
           fs.writeFile(sourceMapPath, result.map, 'utf8', function(err) {
             if (err) {
-              return error(err);
+              error(err);
             }
+
             sourceMapDone = true;
             doneWriting();
           });
@@ -265,18 +269,18 @@ module.exports = function(options) {
 
     // Compare mtimes
     fs.stat(sassPath, function(err, sassStats) {
-      if (err) {
-        error(err);
+      if (err) { // sassPath can't be accessed, nothing to compile
         return next();
       }
 
       fs.stat(cssPath, function(err, cssStats) {
-        if (err) { // CSS has not been compiled, compile it!
-          if ('ENOENT' === err.code) {
-            if (debug) { log('error', 'not found', cssPath); }
+        if (err) {
+          if ('ENOENT' === err.code) { // CSS has not been compiled, compile it!
+            if (debug) { log('debug', 'not found', cssPath); }
             return compile();
           }
 
+          error(err);
           return next(err);
         }
 
