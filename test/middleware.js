@@ -602,7 +602,6 @@ describe('Killing example server', function() {
 
     setTimeout(function() {
       (spawnedServer.killed).should.be.true();
-      (spawnedServer.exitCode === null).should.be.true();
       done();
     }, serverShutdownTimeout);
   });
