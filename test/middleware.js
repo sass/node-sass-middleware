@@ -33,7 +33,6 @@ describe('Creating middleware', function() {
 
 });
 
-
 var spawnedServer;
 
 describe('Spawning example server', function() {
@@ -55,7 +54,7 @@ describe('Spawning example server', function() {
 
 describe('Log messages', function() {
   it('should use the default logger when none provided', function(done) {
-    var expected = '  \u001b[90msource:\u001b[0m \u001b[36m' + index_scssFile + '\u001b[0m';
+    var expected = '[sass]  \u001b[90msource:\u001b[0m \u001b[36m' + index_scssFile + ' \u001b[0m';
 
     http.request({ method: 'GET', host: 'localhost', port: process.env.PORT || '8000', path: '/index.css' })
         .end();
@@ -67,15 +66,15 @@ describe('Log messages', function() {
   });
 
   it('should use the provided custom logger', function(done) {
-    var token = null;
+    var loggerArguments;
 
     var server = connect()
       .use(middleware({
         src: fixture(),
         dest: fixture(),
         debug: true,
-        log: function(severity) {
-          token = severity;
+        log: function() {
+          loggerArguments = arguments;
         }
       }));
 
@@ -83,10 +82,65 @@ describe('Log messages', function() {
       .get('/index.css')
       .expect(200, function() {
         fs.unlink(index_cssFile);
-        token.should.equal('debug');
+        loggerArguments[0].should.equal('debug');
         done();
       });
   });
+
+  it('should skip fast when requested path is missing the prefix', function(done) {
+    this.timeout(this.timeout() + 500);
+
+    var loggerArguments;
+    var dest = '/some/static-css/directory/file.css';
+
+    var server = connect()
+      .use(middleware({
+        src: fixture(),
+        dest: fixture(),
+        debug: true,
+        prefix: '/foo/bar',
+        log: function() {
+          loggerArguments = arguments;
+        }
+      }));
+
+    request(server)
+      .get(dest)
+      .expect(200, function() {
+        loggerArguments[1].should.equal('skip');
+        loggerArguments[2].should.equal(dest);
+        loggerArguments[3].should.equal('prefix mismatch');
+        done();
+      });
+  });
+
+  it('should skip when requested path is not suffixed by css', function(done) {
+    this.timeout(this.timeout() + 500);
+
+    var loggerArguments;
+    var dest = '/assets/file.mp4';
+
+    var server = connect()
+      .use(middleware({
+        src: fixture(),
+        dest: fixture(),
+        debug: true,
+        prefix: '/foo/bar',
+        log: function() {
+          loggerArguments = arguments;
+        }
+      }));
+
+    request(server)
+      .get(dest)
+      .expect(200, function() {
+        loggerArguments[1].should.equal('skip');
+        loggerArguments[2].should.equal(dest);
+        loggerArguments[3].should.equal('nothing to do');
+        done();
+      });
+  });
+
 });
 
 function setupBeforeEach() {
@@ -315,7 +369,6 @@ describe('Using middleware to compile .scss', function() {
             });
           }());
         });
-
     });
 
   });
