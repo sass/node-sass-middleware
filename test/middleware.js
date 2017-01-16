@@ -295,7 +295,6 @@ describe('Using middleware to compile .scss', function() {
     });
 
     it('any change in a dependent file, force recompiling', function(done) {
-
       request(server)
         .get('/index.css')
         .expect(200, function() {
@@ -361,11 +360,10 @@ describe('Using middleware to compile .scss', function() {
               if (exists) {
                 var cont = fs.readFileSync(index_sourceMap).toString();
                 if (cont === result.map.toString()) {
-                  done();
+                  return done();
                 }
-              } else {
-                setTimeout(checkFile, 10);
               }
+              setTimeout(checkFile, 10);
             });
           }());
         });
@@ -446,14 +444,41 @@ describe('Using middleware to compile .sass', function() {
           if (err) {
             done(err);
           } else {
-            (function checkFile() {
-              if (fs.existsSync(test_cssFile)) {
-                fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
-                done();
-              } else {
-                setTimeout(checkFile, 25);
-              }
-            }());
+            if (fs.existsSync(test_cssFile)) {
+              fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
+              done();
+            } else {
+              done(new Error('file was not written before request ends'));
+            }
+          }
+        });
+    });
+
+    it('only writes the compiled contents out to the expected file without serving them', function(done) {
+      var filesrc = fs.readFileSync(test_sassFile),
+          result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true }),
+          anotherResponse = 'something else',
+          server = connect()
+          .use(middleware({
+            response: false,
+            src: fixture(),
+            dest: fixture(),
+            indentedSyntax: true
+          }));
+
+      server.use(function(req, res) {
+        res.end(anotherResponse);
+      });
+
+      request(server)
+        .get('/test.css')
+        .expect(anotherResponse)
+        .expect(200, function(err) {
+          if (err) {
+            done(err);
+          } else {
+            fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
+            done();
           }
         });
     });
@@ -564,7 +589,7 @@ describe('Using middleware to compile .sass', function() {
       request(server)
         .get('/index.css')
         .expect(200, function() {
-          var filesrc = fs.readFileSync(index_scssFile),
+          var filesrc = fs.readFileSync(index_sassFile),
               result = sass.renderSync({ file: index_sassFile, indentedSyntax: true, outFile: index_cssFile, sourceMap: true });
 
           (function checkFile() {
