@@ -82,11 +82,17 @@ module.exports = function(options) {
   var maxAge = options.maxAge || 0;
 
   //Allow custom log function or default one
-  var log = options.log || function(severity, key, val) {
+  var log = options.log || function(severity, key, val, text) {
+    if (!debug && severity === 'debug') { // skip debug when debug is off
+      return;
+    }
+
+    text = text || '';
+
     if (typeof (console[severity]) === 'function') {
-      console[severity]('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
+      console[severity]('[sass]  \x1B[90m%s:\x1B[0m \x1B[36m%s %s\x1B[0m', key, val, text);
     } else {
-      console.error('  \x1B[90m%s:\x1B[0m \x1B[36m%s\x1B[0m', key, val);
+      console.error('[sass]  \x1B[90m%s:\x1B[0m \x1B[36m%s %s\x1B[0m', key, val, text);
     }
   };
 
@@ -101,9 +107,7 @@ module.exports = function(options) {
 
     // This function will be called if something goes wrong
     var error = function(err, errorMessage) {
-      if (debug) {
-        log('error', 'error', errorMessage || err);
-      }
+      log('error', 'error', errorMessage || err);
 
       if (options.error) {
         options.error(err);
@@ -117,12 +121,19 @@ module.exports = function(options) {
     }
 
     var path = url.parse(req.url).pathname;
-    if (options.prefix && 0 === path.indexOf(options.prefix)) {
-      path = path.substring(options.prefix.length);
-    }
 
     if (!/\.css$/.test(path)) {
+      log('debug', 'skip', path, 'nothing to do');
       return next();
+    }
+
+    if (options.prefix) {
+      if (0 === path.indexOf(options.prefix)) {
+        path = path.substring(options.prefix.length);
+      } else {
+        log('debug', 'skip', path, 'prefix mismatch');
+        return next();
+      }
     }
 
     var cssPath = join(dest, path),
@@ -137,10 +148,8 @@ module.exports = function(options) {
       sassDir = dirname(sassPath);
     }
 
-    if (debug) {
-      log('debug', 'source', sassPath);
-      log('debug', 'dest', options.response ? '<response>' : cssPath);
-    }
+    log('debug', 'source', sassPath);
+    log('debug', 'dest', options.response ? '<response>' : cssPath);
 
     // When render is done, respond to the request accordingly
     var done = function(err, result) {
@@ -159,12 +168,10 @@ module.exports = function(options) {
 
       var data = result.css;
 
-      if (debug) {
-        log('debug', 'render', options.response ? '<response>' : sassPath);
+      log('debug', 'render', options.response ? '<response>' : sassPath);
 
-        if (sourceMap) {
-          log('debug', 'render', this.options.sourceMap);
-        }
+      if (sourceMap) {
+        log('debug', 'render', this.options.sourceMap);
       }
       imports[sassPath] = result.stats.includedFiles;
 
@@ -203,6 +210,8 @@ module.exports = function(options) {
         }
 
         fs.writeFile(cssPath, data, 'utf8', function(err) {
+          log('debug', 'write', cssPath);
+
           if (err) {
             error(err);
           }
@@ -222,6 +231,8 @@ module.exports = function(options) {
           }
 
           fs.writeFile(sourceMapPath, result.map, 'utf8', function(err) {
+            log('debug', 'write', sourceMapPath);
+
             if (err) {
               error(err);
             }
@@ -235,10 +246,11 @@ module.exports = function(options) {
 
     // Compile to cssPath
     var compile = function() {
-      if (debug) { log('debug', 'read', cssPath); }
-
       fs.exists(sassPath, function(exists) {
+        log('debug', 'read', sassPath);
+
         if (!exists) {
+          log('debug', 'skip', sassPath, 'does not exist');
           return next();
         }
 
@@ -270,13 +282,14 @@ module.exports = function(options) {
     // Compare mtimes
     fs.stat(sassPath, function(err, sassStats) {
       if (err) { // sassPath can't be accessed, nothing to compile
+        log('debug', 'skip', sassPath, 'is unreadable');
         return next();
       }
 
       fs.stat(cssPath, function(err, cssStats) {
         if (err) {
           if ('ENOENT' === err.code) { // CSS has not been compiled, compile it!
-            if (debug) { log('debug', 'not found', cssPath); }
+            log('debug', 'compile', cssPath, 'was not found');
             return compile();
           }
 
@@ -285,7 +298,7 @@ module.exports = function(options) {
         }
 
         if (sassStats.mtime > cssStats.mtime) { // Source has changed, compile it
-          if (debug) { log('debug', 'modified', cssPath); }
+          log('debug', 'compile', sassPath, 'was modified');
           return compile();
         }
 
@@ -293,7 +306,7 @@ module.exports = function(options) {
         checkImports(sassPath, cssStats.mtime, function(changed) {
           if (debug && changed && changed.length) {
             changed.forEach(function(path) {
-              log('debug', 'modified import %s', path);
+              log('debug', 'compile', path, '(import file) was modified');
             });
           }
           changed && changed.length ? compile() : next();

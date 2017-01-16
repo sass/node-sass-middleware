@@ -130,15 +130,19 @@ app.use(sassMiddleware({
 app.use(express.static(path.join(__dirname, 'public')));
 ```
 
-## Testing
-
-    npm install mocha -g
-
-    mocha test
-
 ## Contributors
 
 We <3 our contributors! A special thanks to all those who have clocked in some dev time on this project, we really appreciate your hard work. You can find [a full list of those people here](https://github.com/sass/node-sass-middleware/graphs/contributors).
+
+### Building and Testing
+
+```sh
+git clone git@github.com:sass/node-sass-middleware
+cd node-sass-middleware
+
+npm install
+npm test
+```
 
 ### Note on Patches/Pull Requests
 
