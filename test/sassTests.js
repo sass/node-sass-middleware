@@ -1,4 +1,6 @@
+/*global describe it before after*/
 'use strict';
+
 var fs = require('fs'),
     path = require('path'),
     should = require('should'),
@@ -7,12 +9,11 @@ var fs = require('fs'),
     connect = require('connect'),
     middleware = require('../middleware'),
     fixture = path.join.bind(null, __dirname, 'fixtures'),
-    test_cssFile = fixture('test.css'),
-    test_sassFile = fixture('test.sass'),
-    index_cssFile = fixture('index.css'),
-    index_sassFile = fixture('index.sass'),
-    index_scssFile = fixture('index.scss'),
-    index_sourceMap = fixture('index.css.map'),
+    testCssFile = fixture('test.css'),
+    testSassFile = fixture('test.sass'),
+    indexCssFile = fixture('index.css'),
+    indexSassFile = fixture('index.sass'),
+    indexSourceMap = fixture('index.css.map'),
     testUtils = require('./testUtils');
 
 describe('Using middleware to compile .sass', function() {
@@ -25,12 +26,12 @@ describe('Using middleware to compile .sass', function() {
     .use(function(err, req, res, next) {
       res.statusCode = 500;
       res.end(err.message);
+      next();
     });
 
-  testUtils.setupBeforeEach(test_cssFile, index_cssFile, index_sourceMap);
+  testUtils.setupBeforeEach(testCssFile, indexCssFile, indexSourceMap);
 
   describe('successful file request', function() {
-
     it('serves a file with 200 Content-Type css', function(done) {
       request(server)
         .get('/test.css')
@@ -40,7 +41,7 @@ describe('Using middleware to compile .sass', function() {
     });
 
     it('serves the compiled contents of the relative sass file', function(done) {
-      var filesrc = fs.readFileSync(test_sassFile),
+      var filesrc = fs.readFileSync(testSassFile),
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
       request(server)
         .get('/test.css')
@@ -49,7 +50,7 @@ describe('Using middleware to compile .sass', function() {
     });
 
     it('writes the compiled contents out to the expected file', function(done) {
-      var filesrc = fs.readFileSync(test_sassFile),
+      var filesrc = fs.readFileSync(testSassFile),
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
       request(server)
         .get('/test.css')
@@ -58,8 +59,8 @@ describe('Using middleware to compile .sass', function() {
           if (err) {
             done(err);
           } else {
-            if (fs.existsSync(test_cssFile)) {
-              fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
+            if (fs.existsSync(testCssFile)) {
+              fs.readFileSync(testCssFile).toString().should.equal(result.css.toString());
               done();
             } else {
               done(new Error('file was not written before request ends'));
@@ -69,7 +70,7 @@ describe('Using middleware to compile .sass', function() {
     });
 
     it('only writes the compiled contents out to the expected file without serving them', function(done) {
-      var filesrc = fs.readFileSync(test_sassFile),
+      var filesrc = fs.readFileSync(testSassFile),
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true }),
           anotherResponse = 'something else',
           server = connect()
@@ -91,29 +92,25 @@ describe('Using middleware to compile .sass', function() {
           if (err) {
             done(err);
           } else {
-            fs.readFileSync(test_cssFile).toString().should.equal(result.css.toString());
+            fs.readFileSync(testCssFile).toString().should.equal(result.css.toString());
             done();
           }
         });
     });
-
   });
 
   describe('unsucessful file request', function() {
-
     it('moves to next middleware', function(done) {
       request(server)
         .get('/does-not-exist.css')
         .expect('Cannot GET /does-not-exist.css\n')
         .expect(404, done);
     });
-
   });
 
   describe('compiling files with dependencies (source file contains includes)', function() {
-
     it('serves the compiled contents of the relative sass file', function(done) {
-      var filesrc = fs.readFileSync(index_sassFile),
+      var filesrc = fs.readFileSync(indexSassFile),
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
       request(server)
         .get('/index.css')
@@ -122,7 +119,7 @@ describe('Using middleware to compile .sass', function() {
     });
 
     it('writes the compiled contents out to the expected file', function(done) {
-      var filesrc = fs.readFileSync(index_sassFile),
+      var filesrc = fs.readFileSync(indexSassFile),
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
 
       request(server)
@@ -133,8 +130,8 @@ describe('Using middleware to compile .sass', function() {
             done(err);
           } else {
             (function checkFile() {
-              if (fs.existsSync(index_cssFile)) {
-                fs.readFileSync(index_cssFile).toString().should.equal(result.css.toString());
+              if (fs.existsSync(indexCssFile)) {
+                fs.readFileSync(indexCssFile).toString().should.equal(result.css.toString());
                 done();
               } else {
                 setTimeout(checkFile, 25);
@@ -149,19 +146,21 @@ describe('Using middleware to compile .sass', function() {
         .get('/index.css')
         .expect(200, function() {
           (function checkInitialFile() {
-            fs.stat(index_cssFile, function(err, initialDate) {
-              if (initialDate != undefined) {
-                fs.appendFile(test_sassFile, '\nbody\n\tbackground: red', function(err, data) {
-                  if (err) throw err;
+            fs.stat(indexCssFile, function(err, initialDate) {
+              if (initialDate !== undefined) {
+                fs.appendFile(testSassFile, '\nbody\n\tbackground: red', function(err) {
+                  if (err) {
+                    throw err;
+                  }
 
-                  var filesrc = fs.readFileSync(index_sassFile),
+                  var filesrc = fs.readFileSync(indexSassFile),
                       result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
 
                   request(server)
                     .get('/index.css')
                     .expect(200, function() {
                       (function checkRecompiledFile() {
-                        var cont = fs.readFileSync(index_cssFile).toString();
+                        var cont = fs.readFileSync(indexCssFile).toString();
                         if (cont === result.css.toString()) {
                           done();
                         } else {
@@ -179,11 +178,10 @@ describe('Using middleware to compile .sass', function() {
 
       // clean
       after(function() {
-        var reset = fs.readFileSync(test_sassFile).toString().replace('\nbody\n\tbackground: red', '');
-        fs.writeFileSync(test_sassFile, reset, { flag: 'w' });
+        var reset = fs.readFileSync(testSassFile).toString().replace('\nbody\n\tbackground: red', '');
+        fs.writeFileSync(testSassFile, reset, { flag: 'w' });
       });
     });
-
   });
 
   describe('generating source-map for compiled css', function() {
@@ -197,19 +195,24 @@ describe('Using middleware to compile .sass', function() {
       .use(function(err, req, res, next) {
         res.statusCode = 500;
         res.end(err.message);
+        next();
       });
 
     it('generates source-map with correct contents', function(done) {
       request(server)
         .get('/index.css')
         .expect(200, function() {
-          var filesrc = fs.readFileSync(index_sassFile),
-              result = sass.renderSync({ file: index_sassFile, indentedSyntax: true, outFile: index_cssFile, sourceMap: true });
+          var result = sass.renderSync({
+                file: indexSassFile,
+                indentedSyntax: true,
+                outFile: indexCssFile,
+                sourceMap: true
+          });
 
           (function checkFile() {
-            fs.exists(index_sourceMap, function(exists) {
+            fs.exists(indexSourceMap, function(exists) {
               if (exists) {
-                var cont = fs.readFileSync(index_sourceMap).toString();
+                var cont = fs.readFileSync(indexSourceMap).toString();
                 if (cont === result.map.toString()) {
                   return done();
                 }
@@ -219,14 +222,12 @@ describe('Using middleware to compile .sass', function() {
           }());
         });
     });
-
   });
 
   describe('compiling files with errors moves to next middleware with err', function() {
-
     // alter
     before(function() {
-      fs.appendFileSync(test_sassFile, '\nbody\n\tbackground;: red');
+      fs.appendFileSync(testSassFile, '\nbody\n\tbackground;: red');
     });
 
     it('if error is in the main file', function(done) {
@@ -245,9 +246,8 @@ describe('Using middleware to compile .sass', function() {
 
     // clean
     after(function() {
-      var reset = fs.readFileSync(test_sassFile).toString().replace('\nbody\n\tbackground;: red', '');
-      fs.writeFileSync(test_sassFile, reset, { flag: 'w' });
+      var reset = fs.readFileSync(testSassFile).toString().replace('\nbody\n\tbackground;: red', '');
+      fs.writeFileSync(testSassFile, reset, { flag: 'w' });
     });
   });
-
 });

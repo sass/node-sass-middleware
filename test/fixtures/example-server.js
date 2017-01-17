@@ -1,6 +1,5 @@
 var express = require('express');
 var sassMiddleware = require('../../middleware');
-var path = require('path');
 var app = express();
 var http = require('http');
 var port = process.env.PORT || 8000;

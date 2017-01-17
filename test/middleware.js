@@ -1,21 +1,19 @@
+/*global describe it*/
 'use strict';
+
 var fs = require('fs'),
     path = require('path'),
-    should = require('should'),
-    sass = require('node-sass'),
     request = require('supertest'),
     connect = require('connect'),
     middleware = require('../middleware'),
     fixture = path.join.bind(null, __dirname, 'fixtures'),
-    test_cssFile = fixture('test.css'),
-    index_cssFile = fixture('index.css'),
-    index_scssFile = fixture('index.scss'),
-    index_sourceMap = fixture('index.css.map'),
+    testCssFile = fixture('test.css'),
+    indexCssFile = fixture('index.css'),
+    indexScssFile = fixture('index.scss'),
     spawn = require('child_process').spawn,
     http = require('http');
 
 describe('Creating middleware', function() {
-
   it('throws an error when omitting src', function() {
     middleware.should.throw(/requires "src"/);
   });
@@ -27,7 +25,6 @@ describe('Creating middleware', function() {
   it('can be given a string as the src option', function() {
     middleware(__dirname).should.be.type('function');
   });
-
 });
 
 var spawnedServer;
@@ -51,7 +48,7 @@ describe('Spawning example server', function() {
 
 describe('Log messages', function() {
   it('should use the default logger when none provided', function(done) {
-    var expected = '[sass]  \u001b[90msource:\u001b[0m \u001b[36m' + index_scssFile + ' \u001b[0m';
+    var expected = '[sass]  \u001b[90msource:\u001b[0m \u001b[36m' + indexScssFile + ' \u001b[0m';
 
     http.request({ method: 'GET', host: 'localhost', port: process.env.PORT || '8000', path: '/index.css' })
         .end();
@@ -78,7 +75,7 @@ describe('Log messages', function() {
     request(server)
       .get('/index.css')
       .expect(200, function() {
-        fs.unlink(index_cssFile);
+        fs.unlink(indexCssFile);
         loggerArguments[0].should.equal('debug');
         done();
       });
@@ -137,7 +134,6 @@ describe('Log messages', function() {
         done();
       });
   });
-
 });
 
 describe('Checking for http headers', function() {
@@ -148,7 +144,7 @@ describe('Checking for http headers', function() {
       dest: fixture(),
       maxAge: oneDay
     }))
-    .use(function(err, req, res, next) {
+    .use(function(err, req, res) {
       res.statusCode = 500;
       res.end(err.message);
     });
@@ -160,15 +156,14 @@ describe('Checking for http headers', function() {
     .expect('Cache-Control', 'max-age=' + oneDay)
     .expect(200, function() {
       // delete file
-      fs.exists(test_cssFile, function(exists) {
+      fs.exists(testCssFile, function(exists) {
         if (exists) {
-          fs.unlink(test_cssFile);
+          fs.unlink(testCssFile);
         }
       });
       done();
     });
   });
-
 });
 
 describe('Killing example server', function() {
