@@ -1,23 +1,25 @@
+/*global beforeEach*/
 'use strict';
+
 var fs = require('fs');
 
-exports.setupBeforeEach = function (test_cssFile, index_cssFile, index_sourceMap) {
+exports.setupBeforeEach = function(testCssFile, indexCssFile, indexSourceMap) {
   beforeEach(function(done) {
-    fs.exists(test_cssFile, function(exists) {
+    fs.exists(testCssFile, function(exists) {
       if (exists) {
-        fs.unlink(test_cssFile);
+        fs.unlink(testCssFile);
       }
     });
 
-    fs.exists(index_cssFile, function(exists) {
+    fs.exists(indexCssFile, function(exists) {
       if (exists) {
-        fs.unlink(index_cssFile);
+        fs.unlink(indexCssFile);
       }
     });
 
-    fs.exists(index_sourceMap, function(exists) {
+    fs.exists(indexSourceMap, function(exists) {
       if (exists) {
-        fs.unlink(index_sourceMap);
+        fs.unlink(indexSourceMap);
       }
     });
 

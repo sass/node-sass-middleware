@@ -4,6 +4,7 @@
   "description": "Connect middleware for node-sass",
   "version": "0.11.0",
   "scripts": {
+    "lint": "./node_modules/.bin/eslint middleware.js test",
     "test": "./node_modules/.bin/mocha"
   },
   "homepage": "https://github.com/sass/node-sass-middleware",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "connect": "^3.5.0",
+    "eslint": "^3.13.1",
     "express": "^4.14.0",
     "mocha": "^3.2.0",
     "should": "^11.1.2",

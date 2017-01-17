@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var sass = require('node-sass'),
     util = require('util'),
@@ -57,14 +57,14 @@ module.exports = function(options) {
   options = options || {};
 
   // Accept single src/dest dir
-  if (typeof options == 'string') {
+  if (typeof options === 'string') {
     options = { src: options };
   }
 
   // Source directory (required)
-  var src = options.src || function() {
+  var src = options.src || (function() {
     throw new Error('sass.middleware() requires "src" directory.');
-  }();
+  }());
   // Destination directory (source by default)
   var dest = options.dest || src;
   // Optional base path for src and dest
@@ -116,7 +116,7 @@ module.exports = function(options) {
       sassMiddlewareError = err;
     };
 
-    if (req.method != 'GET' && req.method != 'HEAD') {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
       return next();
     }
 
@@ -128,7 +128,7 @@ module.exports = function(options) {
     }
 
     if (options.prefix) {
-      if (0 === path.indexOf(options.prefix)) {
+      if (path.indexOf(options.prefix) === 0) {
         path = path.substring(options.prefix.length);
       } else {
         log('debug', 'skip', path, 'prefix mismatch');
@@ -155,7 +155,7 @@ module.exports = function(options) {
     var done = function(err, result) {
       if (err) {
         var file = sassPath;
-        if (err.file && err.file != 'stdin') {
+        if (err.file && err.file !== 'stdin') {
           file = err.file;
         }
 
@@ -242,7 +242,7 @@ module.exports = function(options) {
           });
         });
       }
-    }
+    };
 
     // Compile to cssPath
     var compile = function() {
@@ -288,7 +288,7 @@ module.exports = function(options) {
 
       fs.stat(cssPath, function(err, cssStats) {
         if (err) {
-          if ('ENOENT' === err.code) { // CSS has not been compiled, compile it!
+          if (err.code === 'ENOENT') { // CSS has not been compiled, compile it!
             log('debug', 'compile', cssPath, 'was not found');
             return compile();
           }
@@ -313,7 +313,7 @@ module.exports = function(options) {
         });
       });
     });
-  }
+  };
 };
 
 /**
