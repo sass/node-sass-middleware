@@ -94,17 +94,20 @@ http.createServer(app).listen(3000);
 ### Options
 
  *    `src`            - (String) Source directory used to find `.scss` or `.sass` files.
+ *
  *    optional configurations:
-  *    `dest`           - (String) Destination directory used to output `.css` files (when undefined defaults to `src`).
-  *    `root`           - (String) A base path for both source and destination directories.
-  *    `prefix`         - (String) It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored.
-  *    `force`          - `[true | false]`, false by default. Always re-compile.
-  *    `debug`          - `[true | false]`, false by default. Output debugging information.
-  *    `indentedSyntax` - `[true | false]`, false by default. Compiles files with the `.sass` extension instead of `.scss` in the `src` directory.
-  *    `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
-  *    `error`          - A function to be called when something goes wrong.
-  *    `maxAge`         - MaxAge to be passed in Cache-Control header.
-  *    `log`            - `function(severity, key, val)`, used to log data instead of the default `console.error`
+ *
+ *    `beepOnError`    - Enable beep on error, false by default.
+ *    `debug`          - `[true | false]`, false by default. Output debugging information.
+ *    `dest`           - (String) Destination directory used to output `.css` files (when undefined defaults to `src`).
+ *    `error`          - A function to be called when something goes wrong.
+ *    `force`          - `[true | false]`, false by default. Always re-compile.
+ *    `indentedSyntax` - `[true | false]`, false by default. Compiles files with the `.sass` extension instead of `.scss` in the `src` directory.
+ *    `log`            - `function(severity, key, val)`, used to log data instead of the default `console.error`
+ *    `maxAge`         - MaxAge to be passed in Cache-Control header.
+ *    `prefix`         - (String) It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored.
+ *    `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
+ *    `root`           - (String) A base path for both source and destination directories.
 
 
   For full list of options from original node-sass project go [here](https://github.com/sass/node-sass).
