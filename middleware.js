@@ -74,6 +74,8 @@ module.exports = function(options) {
   var force = options.force || options.response;
   // Enable debug output
   var debug = options.debug;
+  // Enable beep on error
+  var beep = options.beepOnError || false;
 
   var sassExtension = (options.indentedSyntax === true) ? '.sass' : '.scss';
 
@@ -160,7 +162,7 @@ module.exports = function(options) {
         }
 
         var fileLineColumn = file + ':' + err.line + ':' + err.column;
-        var errorMessage = '\x07\x1B[31m' + err.message.replace(/^ +/, '') + '\n\nin ' + fileLineColumn + '\x1B[91m';
+        var errorMessage = (beep ? '\x07' : '') + '\x1B[31m' + err.message.replace(/^ +/, '') + '\n\nin ' + fileLineColumn + '\x1B[91m';
 
         error(err, errorMessage);
         return next(err);
