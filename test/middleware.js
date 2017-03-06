@@ -134,6 +134,31 @@ describe('Log messages', function() {
         done();
       });
   });
+
+  it('should produce beep ', function(done) {
+    this.timeout(this.timeout() + 55500);
+    // setup
+    var testScssFile = fixture('test2.scss');
+    var content = fs.readFileSync(fixture('test.scss')) + '\nbody { background;: red; }';
+    fs.writeFileSync(testScssFile, content, { flag: 'w' });
+
+    var expectedKey = '\x07\x1B';
+
+    http.request({ method: 'GET', host: 'localhost', port: process.env.PORT || '8000', path: '/test2.css' })
+        .end();
+
+    spawnedServer.stderr.on('data', function(data) {
+      // skip until we get the error
+      if(data.indexOf('[sass]  \x1B[90merror:') !== 0) {
+        return;
+      }
+
+      data.toString().should.containEql(expectedKey);
+
+      fs.unlinkSync(testScssFile);
+      done();
+    });
+  });
 });
 
 describe('Checking for http headers', function() {

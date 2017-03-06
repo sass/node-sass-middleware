@@ -8,7 +8,8 @@ app.use(sassMiddleware({
   src: __dirname,
   dest: __dirname,
   debug: true,
-  outputStyle: 'compressed'
+  outputStyle: 'compressed',
+  beepOnError: true
 }));
 
 http.createServer(app).listen(port);

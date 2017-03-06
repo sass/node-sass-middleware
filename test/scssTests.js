@@ -103,7 +103,7 @@ describe('Using middleware to compile .scss', function() {
     it('moves to next middleware', function(done) {
       request(server)
         .get('/does-not-exist.css')
-        .expect('Cannot GET /does-not-exist.css\n')
+        .expect('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /does-not-exist.css</pre>\n</body>\n')
         .expect(404, done);
     });
   });
