@@ -1,4 +1,4 @@
-#node-sass-middleware
+# node-sass-middleware
 
 Connect/Express middleware for [node-sass](https://github.com/sass/node-sass).
 
