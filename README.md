@@ -126,7 +126,7 @@ app.use(sassMiddleware({
     src: __dirname,
     dest: path.join(__dirname, 'public'),
     debug: true,
-    log: function (severity, key, value) { winston.log(severity, 'node-saas-middleware   %s : %s', key, value); }
+    log: function (severity, key, value) { winston.log(severity, 'node-sass-middleware   %s : %s', key, value); }
 }));
 // Note: you must place sass-middleware *before* `express.static` or else it will
 // not work.
