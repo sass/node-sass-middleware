@@ -29,10 +29,10 @@ describe('Creating middleware', function() {
 
 var spawnedServer;
 
-describe('Spawning example server', function() {
+describe('Spawning test server', function() {
   it('starts the server', function(done) {
     var serverStartupTimeout = 950;
-    spawnedServer = spawn('node', [fixture('example-server.js')]);
+    spawnedServer = spawn('node', [fixture('test-server.js')]);
 
     // exclude serverStartupTimeout from timeout and slow counters of test runs
     this.timeout(this.timeout() + serverStartupTimeout);
@@ -191,7 +191,7 @@ describe('Checking for http headers', function() {
   });
 });
 
-describe('Killing example server', function() {
+describe('Killing test server', function() {
   it('stops the server', function(done) {
     spawnedServer.kill();
     var serverShutdownTimeout = 500;
