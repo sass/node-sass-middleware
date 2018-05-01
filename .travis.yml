@@ -1,5 +1,5 @@
 language: node_js
-node_js: [4, 6, 7]
+node_js: [4, 6, 8]
 script: npm run lint && npm test
 deploy:
   provider: npm

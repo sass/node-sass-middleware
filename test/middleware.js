@@ -75,7 +75,7 @@ describe('Log messages', function() {
     request(server)
       .get('/index.css')
       .expect(200, function() {
-        fs.unlink(indexCssFile);
+        fs.unlinkSync(indexCssFile);
         loggerArguments[0].should.equal('debug');
         done();
       });
@@ -183,7 +183,7 @@ describe('Checking for http headers', function() {
         // delete file
         fs.exists(testCssFile, function(exists) {
           if (exists) {
-            fs.unlink(testCssFile);
+            fs.unlinkSync(testCssFile);
           }
         });
         done();
