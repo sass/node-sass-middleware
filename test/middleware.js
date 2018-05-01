@@ -51,7 +51,7 @@ describe('Log messages', function() {
     var expected = '[sass]  \u001b[90msource:\u001b[0m \u001b[36m' + indexScssFile + ' \u001b[0m';
 
     http.request({ method: 'GET', host: 'localhost', port: process.env.PORT || '8000', path: '/index.css' })
-        .end();
+      .end();
 
     spawnedServer.stderr.once('data', function(data) {
       data.toString().should.startWith(expected);
@@ -145,7 +145,7 @@ describe('Log messages', function() {
     var expectedKey = '\x07\x1B';
 
     http.request({ method: 'GET', host: 'localhost', port: process.env.PORT || '8000', path: '/test2.css' })
-        .end();
+      .end();
 
     spawnedServer.stderr.on('data', function(data) {
       // skip until we get the error
@@ -176,18 +176,18 @@ describe('Checking for http headers', function() {
 
   it('custom max-age is set', function(done) {
     request(server)
-    .get('/test.css')
-    .set('Accept', 'text/css')
-    .expect('Cache-Control', 'max-age=' + oneDay)
-    .expect(200, function() {
-      // delete file
-      fs.exists(testCssFile, function(exists) {
-        if (exists) {
-          fs.unlink(testCssFile);
-        }
+      .get('/test.css')
+      .set('Accept', 'text/css')
+      .expect('Cache-Control', 'max-age=' + oneDay)
+      .expect(200, function() {
+        // delete file
+        fs.exists(testCssFile, function(exists) {
+          if (exists) {
+            fs.unlink(testCssFile);
+          }
+        });
+        done();
       });
-      done();
-    });
   });
 });
 

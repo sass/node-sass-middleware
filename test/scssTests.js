@@ -74,12 +74,12 @@ describe('Using middleware to compile .scss', function() {
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: false }),
           anotherResponse = 'something else',
           server = connect()
-          .use(middleware({
-            response: false,
-            src: fixture(),
-            dest: fixture(),
-            indentedSyntax: false
-          }));
+            .use(middleware({
+              response: false,
+              src: fixture(),
+              dest: fixture(),
+              indentedSyntax: false
+            }));
 
       server.use(function(req, res) {
         res.end(anotherResponse);
@@ -203,10 +203,10 @@ describe('Using middleware to compile .scss', function() {
         .get('/index.css')
         .expect(200, function() {
           var result = sass.renderSync({
-                file: indexScssFile,
-                indentedSyntax: false,
-                outFile: indexCssFile,
-                sourceMap: true
+            file: indexScssFile,
+            indentedSyntax: false,
+            outFile: indexCssFile,
+            sourceMap: true
           });
 
           (function checkFile() {
