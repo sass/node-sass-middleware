@@ -7,19 +7,19 @@ exports.setupBeforeEach = function(testCssFile, indexCssFile, indexSourceMap) {
   beforeEach(function(done) {
     fs.exists(testCssFile, function(exists) {
       if (exists) {
-        fs.unlink(testCssFile);
+        fs.unlinkSync(testCssFile);
       }
     });
 
     fs.exists(indexCssFile, function(exists) {
       if (exists) {
-        fs.unlink(indexCssFile);
+        fs.unlinkSync(indexCssFile);
       }
     });
 
     fs.exists(indexSourceMap, function(exists) {
       if (exists) {
-        fs.unlink(indexSourceMap);
+        fs.unlinkSync(indexSourceMap);
       }
     });
 

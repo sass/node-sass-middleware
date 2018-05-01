@@ -74,12 +74,12 @@ describe('Using middleware to compile .sass', function() {
           result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true }),
           anotherResponse = 'something else',
           server = connect()
-          .use(middleware({
-            response: false,
-            src: fixture(),
-            dest: fixture(),
-            indentedSyntax: true
-          }));
+            .use(middleware({
+              response: false,
+              src: fixture(),
+              dest: fixture(),
+              indentedSyntax: true
+            }));
 
       server.use(function(req, res) {
         res.end(anotherResponse);
@@ -103,7 +103,7 @@ describe('Using middleware to compile .sass', function() {
     it('moves to next middleware', function(done) {
       request(server)
         .get('/does-not-exist.css')
-        .expect('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /does-not-exist.css</pre>\n</body>\n')
+        .expect('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /does-not-exist.css</pre>\n</body>\n</html>\n')
         .expect(404, done);
     });
   });
@@ -111,7 +111,7 @@ describe('Using middleware to compile .sass', function() {
   describe('compiling files with dependencies (source file contains includes)', function() {
     it('serves the compiled contents of the relative sass file', function(done) {
       var filesrc = fs.readFileSync(indexSassFile),
-          result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+          result = sass.renderSync({ data: filesrc.toString(), includePaths: [fixture()], indentedSyntax: true });
       request(server)
         .get('/index.css')
         .expect(result.css.toString())
@@ -120,7 +120,7 @@ describe('Using middleware to compile .sass', function() {
 
     it('writes the compiled contents out to the expected file', function(done) {
       var filesrc = fs.readFileSync(indexSassFile),
-          result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+          result = sass.renderSync({ data: filesrc.toString(), includePaths: [fixture()], indentedSyntax: true });
 
       request(server)
         .get('/index.css')
@@ -154,7 +154,7 @@ describe('Using middleware to compile .sass', function() {
                   }
 
                   var filesrc = fs.readFileSync(indexSassFile),
-                      result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+                      result = sass.renderSync({ data: filesrc.toString(), includePaths: [fixture()], indentedSyntax: true });
 
                   request(server)
                     .get('/index.css')
@@ -203,10 +203,10 @@ describe('Using middleware to compile .sass', function() {
         .get('/index.css')
         .expect(200, function() {
           var result = sass.renderSync({
-                file: indexSassFile,
-                indentedSyntax: true,
-                outFile: indexCssFile,
-                sourceMap: true
+            file: indexSassFile,
+            indentedSyntax: true,
+            outFile: indexCssFile,
+            sourceMap: true
           });
 
           (function checkFile() {

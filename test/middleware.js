@@ -29,10 +29,10 @@ describe('Creating middleware', function() {
 
 var spawnedServer;
 
-describe('Spawning example server', function() {
+describe('Spawning test server', function() {
   it('starts the server', function(done) {
     var serverStartupTimeout = 950;
-    spawnedServer = spawn('node', [fixture('example-server.js')]);
+    spawnedServer = spawn('node', [fixture('test-server.js')]);
 
     // exclude serverStartupTimeout from timeout and slow counters of test runs
     this.timeout(this.timeout() + serverStartupTimeout);
@@ -51,9 +51,9 @@ describe('Log messages', function() {
     var expected = '[sass]  \u001b[90msource:\u001b[0m \u001b[36m' + indexScssFile + ' \u001b[0m';
 
     http.request({ method: 'GET', host: 'localhost', port: process.env.PORT || '8000', path: '/index.css' })
-        .end();
+      .end();
 
-    spawnedServer.stderr.once('data', function(data) {
+    spawnedServer.stdout.once('data', function(data) {
       data.toString().should.startWith(expected);
       done();
     });
@@ -75,7 +75,7 @@ describe('Log messages', function() {
     request(server)
       .get('/index.css')
       .expect(200, function() {
-        fs.unlink(indexCssFile);
+        fs.unlinkSync(indexCssFile);
         loggerArguments[0].should.equal('debug');
         done();
       });
@@ -145,11 +145,11 @@ describe('Log messages', function() {
     var expectedKey = '\x07\x1B';
 
     http.request({ method: 'GET', host: 'localhost', port: process.env.PORT || '8000', path: '/test2.css' })
-        .end();
+      .end();
 
     spawnedServer.stderr.on('data', function(data) {
       // skip until we get the error
-      if(data.indexOf('[sass]  \x1B[90merror:') !== 0) {
+      if (data.indexOf('[sass]  \x1B[90merror:') !== 0) {
         return;
       }
 
@@ -176,22 +176,22 @@ describe('Checking for http headers', function() {
 
   it('custom max-age is set', function(done) {
     request(server)
-    .get('/test.css')
-    .set('Accept', 'text/css')
-    .expect('Cache-Control', 'max-age=' + oneDay)
-    .expect(200, function() {
-      // delete file
-      fs.exists(testCssFile, function(exists) {
-        if (exists) {
-          fs.unlink(testCssFile);
-        }
+      .get('/test.css')
+      .set('Accept', 'text/css')
+      .expect('Cache-Control', 'max-age=' + oneDay)
+      .expect(200, function() {
+        // delete file
+        fs.exists(testCssFile, function(exists) {
+          if (exists) {
+            fs.unlinkSync(testCssFile);
+          }
+        });
+        done();
       });
-      done();
-    });
   });
 });
 
-describe('Killing example server', function() {
+describe('Killing test server', function() {
   it('stops the server', function(done) {
     spawnedServer.kill();
     var serverShutdownTimeout = 500;

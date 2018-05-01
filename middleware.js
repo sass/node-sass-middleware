@@ -95,10 +95,10 @@ module.exports = function(options) {
 
     text = text || '';
 
-    if (typeof (console[severity]) === 'function') {
-      console[severity]('[sass]  \x1B[90m%s:\x1B[0m \x1B[36m%s %s\x1B[0m', key, val, text);
-    } else {
+    if (severity === 'error') {
       console.error('[sass]  \x1B[90m%s:\x1B[0m \x1B[36m%s %s\x1B[0m', key, val, text);
+    } else {
+      console.log('[sass]  \x1B[90m%s:\x1B[0m \x1B[36m%s %s\x1B[0m', key, val, text);
     }
   };
 
@@ -149,8 +149,8 @@ module.exports = function(options) {
     if (root) {
       cssPath = join(root, dest, path.replace(new RegExp('^' + dest), ''));
       sassPath = join(root, src, path
-          .replace(new RegExp('^' + dest), '')
-          .replace(/\.css$/, sassExtension));
+        .replace(new RegExp('^' + dest), '')
+        .replace(/\.css$/, sassExtension));
       sassDir = dirname(sassPath);
     }
 
