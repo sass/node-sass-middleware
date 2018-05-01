@@ -95,10 +95,10 @@ module.exports = function(options) {
 
     text = text || '';
 
-    if (typeof (console[severity]) === 'function') {
-      console[severity]('[sass]  \x1B[90m%s:\x1B[0m \x1B[36m%s %s\x1B[0m', key, val, text);
-    } else {
+    if (severity === 'error') {
       console.error('[sass]  \x1B[90m%s:\x1B[0m \x1B[36m%s %s\x1B[0m', key, val, text);
+    } else {
+      console.log('[sass]  \x1B[90m%s:\x1B[0m \x1B[36m%s %s\x1B[0m', key, val, text);
     }
   };
 
