@@ -53,7 +53,7 @@ describe('Log messages', function() {
     http.request({ method: 'GET', host: 'localhost', port: process.env.PORT || '8000', path: '/index.css' })
       .end();
 
-    spawnedServer.stderr.once('data', function(data) {
+    spawnedServer.stdout.once('data', function(data) {
       data.toString().should.startWith(expected);
       done();
     });
@@ -149,7 +149,7 @@ describe('Log messages', function() {
 
     spawnedServer.stderr.on('data', function(data) {
       // skip until we get the error
-      if(data.indexOf('[sass]  \x1B[90merror:') !== 0) {
+      if (data.indexOf('[sass]  \x1B[90merror:') !== 0) {
         return;
       }
 
