@@ -111,7 +111,7 @@ describe('Using middleware to compile .sass', function() {
   describe('compiling files with dependencies (source file contains includes)', function() {
     it('serves the compiled contents of the relative sass file', function(done) {
       var filesrc = fs.readFileSync(indexSassFile),
-          result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+          result = sass.renderSync({ data: filesrc.toString(), includePaths: [fixture()], indentedSyntax: true });
       request(server)
         .get('/index.css')
         .expect(result.css.toString())
@@ -120,7 +120,7 @@ describe('Using middleware to compile .sass', function() {
 
     it('writes the compiled contents out to the expected file', function(done) {
       var filesrc = fs.readFileSync(indexSassFile),
-          result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+          result = sass.renderSync({ data: filesrc.toString(), includePaths: [fixture()], indentedSyntax: true });
 
       request(server)
         .get('/index.css')
@@ -154,7 +154,7 @@ describe('Using middleware to compile .sass', function() {
                   }
 
                   var filesrc = fs.readFileSync(indexSassFile),
-                      result = sass.renderSync({ data: filesrc.toString(), indentedSyntax: true });
+                      result = sass.renderSync({ data: filesrc.toString(), includePaths: [fixture()], indentedSyntax: true });
 
                   request(server)
                     .get('/index.css')
