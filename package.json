@@ -36,10 +36,10 @@
   },
   "devDependencies": {
     "connect": "^3.6.6",
-    "eslint": "^4.19.1",
-    "express": "^4.16.3",
-    "mocha": "^5.1.1",
-    "should": "^13.2.1",
-    "supertest": "^3.0.0"
+    "eslint": "^5.16.0",
+    "express": "^4.16.4",
+    "mocha": "^6.0.2",
+    "should": "^13.2.3",
+    "supertest": "^4.0.2"
   }
 }
