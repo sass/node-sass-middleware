@@ -94,9 +94,9 @@ http.createServer(app).listen(3000);
 ### Options
 
  *    `src`            - (String) Source directory used to find `.scss` or `.sass` files.
- *
- *    optional configurations:
- *
+
+#### Optional configurations:
+
  *    `beepOnError`    - Enable beep on error, false by default.
  *    `debug`          - `[true | false]`, false by default. Output debugging information.
  *    `dest`           - (String) Destination directory used to output `.css` files (when undefined defaults to `src`).
