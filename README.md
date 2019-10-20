@@ -102,7 +102,7 @@ http.createServer(app).listen(3000);
  *    `dest`           - (String) Destination directory used to output `.css` files (when undefined defaults to `src`).
  *    `error`          - A function to be called when something goes wrong.
  *    `force`          - `[true | false]`, false by default. Always re-compile.
- *    `indentedSyntax` - `[true | false]`, false by default. Compiles files with the `.sass` extension instead of `.scss` in the `src` directory.
+ *    `indentedSyntax` - `[true | false]`, false by default. If true compiles files with the `.sass` extension instead of `.scss` in the `src` directory.
  *    `log`            - `function(severity, key, val)`, used to log data instead of the default `console.error`
  *    `maxAge`         - MaxAge to be passed in Cache-Control header.
  *    `prefix`         - (String) It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored.
@@ -111,7 +111,7 @@ http.createServer(app).listen(3000);
 
 
   For full list of options from original node-sass project go [here](https://github.com/sass/node-sass).
-  
+
 ### Express example with custom log function
 
 ```javascript
