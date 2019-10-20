@@ -28,7 +28,7 @@
     "url": "git://github.com/sass/node-sass-middleware.git"
   },
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=8.0.0"
   },
   "dependencies": {
     "mkdirp": "^0.5.1",
