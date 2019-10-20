@@ -32,14 +32,14 @@
   },
   "dependencies": {
     "mkdirp": "^0.5.1",
-    "node-sass": "^4.9.0"
+    "node-sass": "^4.12.0"
   },
   "devDependencies": {
-    "connect": "^3.6.6",
+    "connect": "^3.7.0",
     "eslint": "^6.5.1",
-    "express": "^4.16.3",
+    "express": "^4.17.1",
     "mocha": "^6.2.2",
-    "should": "^13.2.1",
+    "should": "^13.2.3",
     "supertest": "^4.0.2"
   }
 }
