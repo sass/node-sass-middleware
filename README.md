@@ -103,7 +103,7 @@ http.createServer(app).listen(3000);
  *    `error`          - A function to be called when something goes wrong.
  *    `force`          - `[true | false]`, false by default. Always re-compile.
  *    `indentedSyntax` - `[true | false]`, false by default. If true compiles files with the `.sass` extension instead of `.scss` in the `src` directory.
- *    `log`            - `function(severity, key, val)`, used to log data instead of the default `console.error`
+ *    `log`            - `function(severity, key, val, message)`, used to log data instead of the default `console.error`. "severity" matches [Winston](https://www.npmjs.com/package/winston) severity levels.
  *    `maxAge`         - MaxAge to be passed in Cache-Control header.
  *    `prefix`         - (String) It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored.
  *    `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
