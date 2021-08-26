@@ -14,7 +14,7 @@ var imports = {};
  *
  * Options:
  *
- *    all supportend options from node-sass project plus following:
+ *    all supported options from node-sass project plus following:
  *
  *    `src`            - (String) Source directory used to find `.scss` or `.sass` files.
  *
