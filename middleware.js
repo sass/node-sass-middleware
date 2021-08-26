@@ -5,7 +5,6 @@ var sass = require('node-sass'),
     fs = require('fs'),
     url = require('url'),
     dirname = require('path').dirname,
-    mkdirp = require('mkdirp'),
     join = require('path').join;
 
 var imports = {};
@@ -208,7 +207,7 @@ module.exports = function(options) {
       cssDone = false;
       sourceMapDone = !sourceMap;
 
-      mkdirp(dirname(cssPath), '0700', function(err) {
+      fs.mkdir(dirname(cssPath), { mode: '0700', recursive: true},  function(err) {
         if (err) {
           error(err);
           cssDone = true;
@@ -229,7 +228,7 @@ module.exports = function(options) {
 
       if (sourceMap) {
         var sourceMapPath = this.options.sourceMap;
-        mkdirp(dirname(sourceMapPath), '0700', function(err) {
+        fs.mkdir(dirname(sourceMapPath), { mode: '0700', recursive: true}, function(err) {
           if (err) {
             error(err);
             sourceMapDone = true;
