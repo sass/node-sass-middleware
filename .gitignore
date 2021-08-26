@@ -20,3 +20,4 @@ vagrant
 .DS_Store
 .sass-cache
 test/fixtures/**/*.css
+package-lock.json
