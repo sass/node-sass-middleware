@@ -2,15 +2,15 @@
 
 Connect/Express middleware for [node-sass](https://github.com/sass/node-sass).
 
-[![Build Status](https://travis-ci.org/sass/node-sass-middleware.svg?branch=master&style=flat)](https://travis-ci.org/sass/node-sass-middleware)
+[![Main CI Workflow](https://github.com/sass/node-sass-middleware/actions/workflows/ci.yml/badge.svg)](https://github.com/sass/node-sass-middleware/actions/workflows/ci.yml)
 [![npm version](https://badge.fury.io/js/node-sass-middleware.svg)](http://badge.fury.io/js/node-sass-middleware)
-[![Dependency Status](https://david-dm.org/sass/node-sass-middleware.svg?theme=shields.io)](https://david-dm.org/sass/node-sass-middleware)
-[![devDependency Status](https://david-dm.org/sass/node-sass-middleware/dev-status.svg?theme=shields.io)](https://david-dm.org/sass/node-sass-middleware#info=devDependencies)
 [![Gitter chat](http://img.shields.io/badge/gitter-sass/node--sass-brightgreen.svg)](https://gitter.im/sass/node-sass)
 
 ## Install
 
-    npm install node-sass-middleware
+```bash
+npm install node-sass-middleware
+```
 
 ## Usage
 
@@ -93,22 +93,21 @@ http.createServer(app).listen(3000);
 
 ### Options
 
- *    `src`            - (String) Source directory used to find `.scss` or `.sass` files.
+* `src`            - (String) Source directory used to find `.scss` or `.sass` files.
 
-#### Optional configurations:
+#### Optional configurations
 
- *    `beepOnError`    - Enable beep on error, false by default.
- *    `debug`          - `[true | false]`, false by default. Output debugging information.
- *    `dest`           - (String) Destination directory used to output `.css` files (when undefined defaults to `src`).
- *    `error`          - A function to be called when something goes wrong.
- *    `force`          - `[true | false]`, false by default. Always re-compile.
- *    `indentedSyntax` - `[true | false]`, false by default. If true compiles files with the `.sass` extension instead of `.scss` in the `src` directory.
- *    `log`            - `function(severity, key, val, message)`, used to log data instead of the default `console.error`. "severity" matches [Winston](https://www.npmjs.com/package/winston) severity levels.
- *    `maxAge`         - MaxAge to be passed in Cache-Control header.
- *    `prefix`         - (String) It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored.
- *    `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
- *    `root`           - (String) A base path for both source and destination directories.
-
+* `beepOnError`    - Enable beep on error, false by default.
+* `debug`          - `[true | false]`, false by default. Output debugging information.
+* `dest`           - (String) Destination directory used to output `.css` files (when undefined defaults to `src`).
+* `error`          - A function to be called when something goes wrong.
+* `force`          - `[true | false]`, false by default. Always re-compile.
+* `indentedSyntax` - `[true | false]`, false by default. If true compiles files with the `.sass` extension instead of `.scss` in the `src` directory.
+* `log`            - `function(severity, key, val, message)`, used to log data instead of the default `console.error`. "severity" matches [Winston](https://www.npmjs.com/package/winston) severity levels.
+* `maxAge`         - MaxAge to be passed in Cache-Control header.
+* `prefix`         - (String) It will tell the sass middleware that any request file will always be prefixed with `<prefix>` and this prefix should be ignored.
+* `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
+* `root`           - (String) A base path for both source and destination directories.
 
   For full list of options from original node-sass project go [here](https://github.com/sass/node-sass).
 
@@ -149,11 +148,11 @@ npm test
 
 ### Note on Patches/Pull Requests
 
- * Fork the project.
- * Make your feature addition or bug fix.
- * Add documentation if necessary.
- * Add tests for it. This is important so I don't break it in a future version unintentionally.
- * Send a pull request. Bonus points for topic branches.
+* Fork the project.
+* Make your feature addition or bug fix.
+* Add documentation if necessary.
+* Add tests for it. This is important so I don't break it in a future version unintentionally.
+* Send a pull request. Bonus points for topic branches.
 
 ## Copyright
 
