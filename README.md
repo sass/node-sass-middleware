@@ -19,9 +19,9 @@ Recompile `.scss` or `.sass` files automatically for connect and express based h
 ### Connect example
 
 ```javascript
-var connect = require('connect')
-var sassMiddleware = require('node-sass-middleware')
-var server = connect.createServer(
+const connect = require('connect')
+const sassMiddleware = require('node-sass-middleware')
+const server = connect.createServer(
   sassMiddleware({
       /* Options */
       src: __dirname
@@ -41,10 +41,10 @@ Heavily inspired by <https://github.com/LearnBoost/stylus>
 ### Express example
 
 ```javascript
-var express = require('express');
-var sassMiddleware = require('node-sass-middleware');
-var path = require('path');
-var app = express();
+const express = require('express');
+const sassMiddleware = require('node-sass-middleware');
+const path = require('path');
+const app = express();
 app.use(sassMiddleware({
     /* Options */
     src: __dirname,
@@ -61,14 +61,14 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 ### Connect with other middleware example
 
 ```javascript
-var connect = require('connect');
-var sassMiddleware = require('node-sass-middleware');
-var postcssMiddleware = require('postcss-middleware');
-var autoprefixer = require('autoprefixer');
-var path = require('path');
-var http = require('http');
-var app = connect();
-var destPath = __dirname + '/public';
+const connect = require('connect');
+const sassMiddleware = require('node-sass-middleware');
+const postcssMiddleware = require('postcss-middleware');
+const autoprefixer = require('autoprefixer');
+const path = require('path');
+const http = require('http');
+const app = connect();
+const destPath = __dirname + '/public';
 app.use(sassMiddleware({
     /* Options */
     src: __dirname
@@ -115,11 +115,11 @@ http.createServer(app).listen(3000);
 ### Express example with custom log function
 
 ```javascript
-var express = require('express');
-var sassMiddleware = require('node-sass-middleware');
-var path = require('path');
-var winston = require('winston');
-var app = express();
+const express = require('express');
+const sassMiddleware = require('node-sass-middleware');
+const path = require('path');
+const winston = require('winston');
+const app = express();
 winston.level = 'debug';
 app.use(sassMiddleware({
     /* Options */
