@@ -4,7 +4,7 @@
 var fs = require('fs'),
     path = require('path'),
     should = require('should'),
-    sass = require('node-sass'),
+    sass = require('sass'),
     request = require('supertest'),
     connect = require('connect'),
     middleware = require('../middleware'),
@@ -148,7 +148,7 @@ describe('Using middleware to compile .sass', function() {
           (function checkInitialFile() {
             fs.stat(indexCssFile, function(err, initialDate) {
               if (initialDate !== undefined) {
-                fs.appendFile(testSassFile, '\nbody\n\tbackground: red', function(err) {
+                fs.appendFile(testSassFile, '\nbody\n    background: red', function(err) {
                   if (err) {
                     throw err;
                   }
@@ -178,7 +178,7 @@ describe('Using middleware to compile .sass', function() {
 
       // clean
       after(function() {
-        var reset = fs.readFileSync(testSassFile).toString().replace('\nbody\n\tbackground: red', '');
+        var reset = fs.readFileSync(testSassFile).toString().replace('\nbody\n    background: red', '');
         fs.writeFileSync(testSassFile, reset, { flag: 'w' });
       });
     });
@@ -227,26 +227,37 @@ describe('Using middleware to compile .sass', function() {
   describe('compiling files with errors moves to next middleware with err', function() {
     // alter
     before(function() {
-      fs.appendFileSync(testSassFile, '\nbody\n\tbackground;: red');
+      fs.appendFileSync(testSassFile, '\nbody\n    background;: red');
     });
 
     it('if error is in the main file', function(done) {
       request(server)
         .get('/test.css')
-        .expect('property "background" must be followed by a \':\'')
+        .expect('Expected newline.\n' +
+        '   ╷\n' +
+        '21 │     background;: red\n' +
+        '   │               ^\n' +
+        '   ╵\n' +
+        '  test\\fixtures\\test.sass 21:15  root stylesheet')
         .expect(500, done);
     });
 
     it('if error is in imported file', function(done) {
       request(server)
         .get('/index.css')
-        .expect('property "background" must be followed by a \':\'')
+        .expect('Expected newline.\n' +
+        '   ╷\n' +
+        '21 │     background;: red\n' +
+        '   │               ^\n' +
+        '   ╵\n' +
+        '  test\\fixtures\\test.sass 21:15  @import\n' +
+        '  test\\fixtures\\index.sass 1:9   root stylesheet')
         .expect(500, done);
     });
 
     // clean
     after(function() {
-      var reset = fs.readFileSync(testSassFile).toString().replace('\nbody\n\tbackground;: red', '');
+      var reset = fs.readFileSync(testSassFile).toString().replace('\nbody\n    background;: red', '');
       fs.writeFileSync(testSassFile, reset, { flag: 'w' });
     });
   });

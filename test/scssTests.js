@@ -4,7 +4,7 @@
 var fs = require('fs'),
     path = require('path'),
     should = require('should'),
-    sass = require('node-sass'),
+    sass = require('sass'),
     request = require('supertest'),
     connect = require('connect'),
     middleware = require('../middleware'),
@@ -233,14 +233,25 @@ describe('Using middleware to compile .scss', function() {
     it('if error is in the main file', function(done) {
       request(server)
         .get('/test.css')
-        .expect('property "background" must be followed by a \':\'')
+        .expect('expected "{".\n' +
+        '   ╷\n' +
+        '21 │ body { background;: red; }\n' +
+        '   │                  ^\n' +
+        '   ╵\n' +
+        '  test\\fixtures\\test.scss 21:18  root stylesheet')
         .expect(500, done);
     });
 
     it('if error is in imported file', function(done) {
       request(server)
         .get('/index.css')
-        .expect('property "background" must be followed by a \':\'')
+        .expect('expected "{".\n' +
+        '   ╷\n' +
+        '21 │ body { background;: red; }\n' +
+        '   │                  ^\n' +
+        '   ╵\n' +
+        '  test\\fixtures\\test.scss 21:18  @import\n' +
+        '  test\\fixtures\\index.scss 1:9   root stylesheet')
         .expect(500, done);
     });
 
