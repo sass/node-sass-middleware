@@ -1,6 +1,6 @@
 # node-sass-middleware
 
-Connect/Express middleware for [node-sass](https://github.com/sass/node-sass).
+Connect/Express middleware for [dart-sass](https://github.com/sass/dart-sass).
 
 [![Main CI Workflow](https://github.com/sass/node-sass-middleware/actions/workflows/ci.yml/badge.svg)](https://github.com/sass/node-sass-middleware/actions/workflows/ci.yml)
 [![npm version](https://badge.fury.io/js/node-sass-middleware.svg)](http://badge.fury.io/js/node-sass-middleware)
@@ -109,7 +109,7 @@ http.createServer(app).listen(3000);
 * `response`       - `[true | false]`, true by default. To write output directly to response instead of to a file.
 * `root`           - (String) A base path for both source and destination directories.
 
-  For full list of options from original node-sass project go [here](https://github.com/sass/node-sass).
+  For full list of options from original dart-sass project go [here](https://github.com/sass/dart-sass).
 
 ### Express example with custom log function
 
