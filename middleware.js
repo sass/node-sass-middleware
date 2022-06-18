@@ -176,7 +176,7 @@ module.exports = function(options) {
       log('debug', 'render', options.response ? '<response>' : sassPath);
 
       if (sourceMap) {
-        log('debug', 'render', this.options.sourceMap);
+        log('debug', 'render', cssPath + '.map');
       }
       imports[sassPath] = result.stats.includedFiles;
 
@@ -227,7 +227,7 @@ module.exports = function(options) {
       });
 
       if (sourceMap) {
-        var sourceMapPath = this.options.sourceMap;
+        var sourceMapPath = cssPath + '.map';
         fs.mkdir(dirname(sourceMapPath), { mode: '0700', recursive: true}, function(err) {
           if (err) {
             error(err);
