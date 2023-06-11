@@ -12,9 +12,10 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          - 12
-          - 14
           - 16
+          - 18
+          - 19
+          - 20
 
         os:
           - ubuntu-latest
@@ -23,10 +24,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v2.4.0
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
 
