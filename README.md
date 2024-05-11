@@ -1,5 +1,12 @@
 # node-sass-middleware
 
+> [!WARNING]
+[LibSass, Node Sass and this middleware are deprecated](https://sass-lang.com/blog/libsass-is-deprecated).
+While they will continue to receive maintenance releases indefinitely, there are no
+plans to add additional features or compatibility with any new CSS or Sass features.
+Projects that still use it should move onto
+[Dart Sass](https://sass-lang.com/dart-sass).
+
 Connect/Express middleware for [node-sass](https://github.com/sass/node-sass).
 
 [![Main CI Workflow](https://github.com/sass/node-sass-middleware/actions/workflows/ci.yml/badge.svg)](https://github.com/sass/node-sass-middleware/actions/workflows/ci.yml)
